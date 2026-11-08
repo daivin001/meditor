@@ -1,0 +1,129 @@
+/**
+ * block-handle.css — 语雀风格块手柄样式
+ *
+ * + 按钮(绿色圆钮) + 六点拖拽把手,hover 块时浮现在块左侧外。
+ * 定位由 BlockProvider(floating-ui, strategy fixed)写入 left/top。
+ */
+
+.zt-md-block-handle {
+  position: fixed;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  /* 图标水平间距由两个旋钮决定(勿在此叠其它偏移):
+   * 1. 本容器 gap —— 布局间距;
+   * 2. grip 的 margin-left —— 补偿 lucide 图标 24 视图的光学留白差
+   *    (grip 图形仅 8/24 宽,两侧 ~5px 留白;加号 ~3px),见 .zt-md-block-handle-grip。
+   * 手柄相对内容左缘的距离在 block-handle.ts 的 getOffset(floating-ui)。 */
+  gap: 2px;
+  /* data-show 由 BlockProvider 维护(true 显示/false 隐藏)。 */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.zt-md-block-handle[data-show='true'] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* + 插入按钮(普通线条加号) */
+.zt-md-block-handle-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-md-muted, #9ca3af);
+  cursor: pointer;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.zt-md-block-handle-plus:hover {
+  color: var(--zt-md-fg, #374151);
+  background: var(--zt-md-bg-hover, #f3f4f6);
+}
+
+/* 六点拖拽把手 */
+.zt-md-block-handle-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  /* 间距旋钮:grip 相对加号的水平补偿(负值=向加号收拢,正值=拉开)。 */
+  margin-left: -2px;
+  color: var(--zt-md-muted, #9ca3af);
+  cursor: grab;
+  border-radius: 4px;
+  transition: color 0.12s ease, background 0.12s ease;
+}
+
+.zt-md-block-handle-grip:hover {
+  color: var(--zt-md-fg, #374151);
+  background: var(--zt-md-bg-hover, #f3f4f6);
+}
+
+/* 键盘聚焦把手:与 hover 同强度反馈(role="button" + tabindex=0 可达性配套) */
+.zt-md-block-handle-grip:focus-visible {
+  outline: 1px solid var(--zt-md-primary, #2563eb);
+  color: var(--zt-md-fg, #374151);
+}
+
+/* 拖拽进行中:手柄变抓取态 */
+.zt-md-block-handle[data-show='true'] .zt-md-block-handle-grip:active {
+  cursor: grabbing;
+}
+
+/* 移动端:放大手柄热区(对齐 slash 菜单移动端 44px 的放宽思路) */
+@media (max-width: 767px) {
+  .zt-md-block-handle-plus,
+  .zt-md-block-handle-grip {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* 图标容器 */
+.zt-md-block-handle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 拖拽中给编辑器根的辅助样式(block-service 写 dataset.dragging) */
+.zt-md-editor .ProseMirror[data-dragging='true'] {
+  user-select: none;
+}
+
+
+/* ===== 顶层块多选(shift + 块手柄) ===== */
+
+/* 多选区间内的顶层块高亮(Decoration.node 注入类) */
+.zt-md-editor .zt-md-block-selected {
+  background: color-mix(in srgb, var(--zt-primary) 7%, transparent);
+  border-radius: var(--zt-radius);
+  box-shadow: inset 2px 0 0 var(--zt-primary);
+}
+
+/* 多块拖拽影像(挂在 body,随 setDragImage 使用后移除) */
+.zt-md-multi-drag-image {
+  position: fixed;
+  top: -10000px;
+  left: -10000px;
+  z-index: -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 640px;
+  padding: 0.5rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  opacity: 0.92;
+  pointer-events: none;
+}

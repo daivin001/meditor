@@ -1,0 +1,62 @@
+/* jsondata-view-block.css — meditor 内嵌 JSON 数据视图块容器样式 */
+
+.zt-md-editor .zt-md-jsondata-view-block {
+  position: relative;
+  margin-block: 0.5rem;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block[data-selected='true'] {
+  outline: 2px solid var(--zt-primary);
+  outline-offset: 2px;
+  border-radius: var(--zt-radius);
+}
+
+/* ===== 宿主页面样式防泄漏 =====
+ * meditor 内嵌于任意网页,页面自身的 table/tr/td 规则会漏进 NodeView 内部,
+ * 在表格行间/块缘挤出空白间隙(margin、border-spacing 撑开行距等)。
+ * 此处按嵌入组件惯例钉死关键布局属性;干净环境下均为无操作。 */
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-wrapper {
+  /* 块外间距由 .zt-md-jsondata-view-block 的 margin-block 承担,
+   * wrapper 自身留 0:避免宿主环境 margin 不折叠时块内出现上下缝隙 */
+  margin-block: 0;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table-view {
+  display: block;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table {
+  margin: 0;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+  /* 防宿主页面 table 边框泄漏:表格自身不画边框,外圈由块容器边框承担 */
+  border: none;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table thead,
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table tbody,
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table tr {
+  border: none;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table th,
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table td {
+  margin: 0;
+  /* 顶边/左边不画线:紧邻顶栏分隔线与容器左边框,画了会叠成 2px 粗线 */
+  border-top: none;
+  border-left: none;
+}
+
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table tr {
+  display: table-row;
+}
+
+/* 列头行底色:与数据库名称行同一 fg 4% 淡灰;高优先级选择器,
+ * 防宿主页面 th 背景规则(同特异性时按加载顺序覆盖)把列头压深 */
+.zt-md-editor .zt-md-jsondata-view-block .zt-jsonview-table .zt-jsonview-head-row th {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+}
+

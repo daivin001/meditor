@@ -1,0 +1,47 @@
+/* modules/source-mode.css — 源码模式(整篇 Markdown 源码文本编辑)
+ *
+ * wrapper 级 data-source-mode 驱动显隐:富文本层(ProseMirror)隐藏,
+ * 等宽源码文本框铺满编辑区内容盒;高度由 JS 随内容自动增长,
+ * 滚动复用编辑区容器(与富文本层同一滚动语境,工具栏/只读徽标照常联动)。
+ */
+
+/* 源码文本框:常态隐藏,仅源码模式展示;排版对齐正文(行高/选区色),字体取等宽令牌。 */
+.zt-md-editor .meditor-source-editor {
+  display: none;
+  width: 100%;
+  min-height: 12em;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  background: transparent;
+  color: var(--zt-fg);
+  caret-color: var(--zt-primary);
+  font-family: var(--zt-font-mono);
+  font-size: 13.5px;
+  line-height: 1.75;
+  tab-size: 2;
+}
+
+.zt-md-editor .meditor-source-editor::selection {
+  background: color-mix(in srgb, var(--zt-primary) 24%, transparent);
+}
+
+/* 源码模式:隐藏富文本层与初始化错误兜底卡,展示源码文本框。 */
+.zt-md[data-source-mode='on'] .zt-md-editor .ProseMirror,
+.zt-md[data-source-mode='on'] .zt-md-editor .zt-md-error {
+  display: none;
+}
+
+.zt-md[data-source-mode='on'] .zt-md-editor .meditor-source-editor {
+  display: block;
+}
+
+/* 源码视图隐藏编辑交互浮层:块手柄(+/拖拽)与选区工具栏均作用于隐藏的
+   富文本层,源码文本框下保留会诱导出对源码内容无效的操作路径。 */
+.zt-md[data-source-mode='on'] .zt-md-block-handle,
+.zt-md[data-source-mode='on'] .zt-md-selection-tooltip {
+  display: none !important;
+}

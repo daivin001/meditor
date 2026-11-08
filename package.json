@@ -1,0 +1,22 @@
+{
+  "name": "meditor-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "MEditor monorepo — @meditor/editor 编辑器组件包与 MEditor 桌面应用",
+  "workspaces": [
+    "editor",
+    "editor/packages/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspace @meditor/editor",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspace @meditor/editor",
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

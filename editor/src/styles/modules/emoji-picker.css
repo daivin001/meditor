@@ -1,0 +1,104 @@
+/* styles/modules/emoji-picker.css — emoji 选择面板
+ *
+ * 挂载于编辑器 portal 层(absolute inset:0),坐标由 emoji-picker 组件计算;
+ * 视觉令牌与 slash-menu 对齐(--zt-border/--zt-surface/--zt-primary 等)。
+ */
+
+.zt-md-emoji-picker {
+  position: absolute;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  max-height: min(380px, calc(100% - 16px));
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  box-shadow: 0 12px 28px -16px color-mix(in srgb, black 28%, transparent);
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+.zt-md-emoji-picker-search {
+  flex: 0 0 auto;
+  margin: 10px 10px 0;
+  padding: 7px 10px;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+}
+
+.zt-md-emoji-picker-search:focus {
+  border-color: var(--zt-primary);
+}
+
+.zt-md-emoji-picker-search::placeholder {
+  color: var(--zt-muted);
+}
+
+.zt-md-emoji-picker-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 10px 10px;
+}
+
+.zt-md-emoji-picker-group {
+  margin: 8px 2px 6px;
+  color: var(--zt-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.zt-md-emoji-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.zt-md-emoji-picker-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zt-md-emoji-picker-cell:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-emoji-picker-empty {
+  padding: 24px 0;
+  color: var(--zt-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .zt-md-emoji-picker {
+    width: min(320px, calc(100% - 16px));
+  }
+
+  .zt-md-emoji-picker-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .zt-md-emoji-picker-cell {
+    font-size: 22px;
+  }
+}

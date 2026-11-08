@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEditor</title>
+  </head>
+  <body>
+    <div id="app">
+      <!-- 自绘标题栏(无边框窗口):logo(菜单入口) / 页签 / 窗口控制。
+           空白区域带 data-tauri-drag-region 供拖拽与双击最大化,
+           页签和控制按钮自身不带该属性,不影响点击。 -->
+      <header id="titlebar" data-tauri-drag-region>
+        <!-- 左上角 logo 即菜单按钮:与应用图标同款(靛蓝渐变圆角底 + 白色粗体 M) -->
+        <div class="menu-wrap">
+          <button id="btn-menu" class="brand-mark" title="菜单" aria-haspopup="menu" data-i18n-title="appTitle">
+            <svg viewBox="0 0 48 48" aria-hidden="true">
+              <defs>
+                <linearGradient id="brand-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#2f4ea8" />
+                  <stop offset="1" stop-color="#1e2f6c" />
+                </linearGradient>
+              </defs>
+              <rect x="0" y="0" width="48" height="48" rx="9.4" fill="url(#brand-grad)" />
+              <text
+                x="24"
+                y="25"
+                text-anchor="middle"
+                dominant-baseline="central"
+                font-family="'Segoe UI Semibold','Segoe UI',Arial,sans-serif"
+                font-weight="600"
+                font-size="30"
+                fill="#ffffff"
+              >
+                M
+              </text>
+            </svg>
+          </button>
+          <div id="file-menu" class="menu-pop" hidden>
+            <button class="menu-item" id="mi-new"><span data-i18n="menuNew"></span><span class="kbd">Ctrl+N</span></button>
+            <button class="menu-item" id="mi-open"><span data-i18n="menuOpen"></span><span class="kbd">Ctrl+O</span></button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="mi-save"><span data-i18n="menuSave"></span><span class="kbd">Ctrl+S</span></button>
+            <button class="menu-item" id="mi-save-as"><span data-i18n="menuSaveAs"></span><span class="kbd">Ctrl+Shift+S</span></button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="mi-export-html" data-i18n="menuExportHtml"></button>
+            <button class="menu-item" id="mi-print" data-i18n="menuPrint"></button>
+            <button class="menu-item" id="mi-copy-llm" data-i18n="menuCopyLlm"></button>
+            <div class="menu-sep"></div>
+            <div id="recent-files"></div>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="mi-outline" data-i18n="menuOutline"></button>
+            <button class="menu-item" id="mi-blocks-mode" data-i18n="menuBlocksMode"></button>
+            <button class="menu-item" id="mi-layout-full" data-i18n="menuLayoutFull"></button>
+            <button class="menu-item" id="mi-layout-wide" data-i18n="menuLayoutWide"></button>
+            <button class="menu-item" id="mi-focus-mode" data-i18n="menuFocusMode"></button>
+            <button class="menu-item" id="mi-typewriter-mode" data-i18n="menuTypewriterMode"></button>
+            <div class="menu-sep"></div>
+            <button class="menu-item" id="mi-theme"><span data-i18n="menuTheme"></span><span class="kbd">Ctrl+J</span></button>
+            <button class="menu-item" id="mi-settings" data-i18n="menuSettings"></button>
+          </div>
+        </div>
+        <div id="tabstrip" data-tauri-drag-region>
+          <button id="tab-scroll-left" class="tab-scroll" title="向左滚动页签" hidden>
+            <svg viewBox="0 0 14 14"><path d="M9.2 2.4 4.4 7l4.8 4.6z" /></svg>
+          </button>
+          <div id="tabs" role="tablist" aria-label="打开的文档"></div>
+          <button id="tab-scroll-right" class="tab-scroll" title="向右滚动页签" hidden>
+            <svg viewBox="0 0 14 14"><path d="M4.8 2.4 9.6 7l-4.8 4.6z" /></svg>
+          </button>
+          <button id="tab-new" class="tab-new" title="新建标签页 (Ctrl+N)" data-i18n-title="tabNewTitle">
+            <svg viewBox="2.4 2.4 19.2 19.2"><path d="M12 5v14M5 12h14" /></svg>
+          </button>
+        </div>
+        <div class="win-controls">
+          <button id="win-min" class="win-btn" title="最小化" data-i18n-title="winMinTitle">
+            <svg viewBox="0 0 12 12"><path d="M1 6h10" /></svg>
+          </button>
+          <button id="win-max" class="win-btn" title="最大化 / 还原" data-i18n-title="winMaxTitle">
+            <svg class="ic-max" viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" rx="1" /></svg>
+            <svg class="ic-restore" viewBox="0 0 12 12">
+              <rect x="1.5" y="3.5" width="7" height="7" rx="1" />
+              <path d="M4 3.5V2.3c0-.4.3-.8.8-.8h4.9c.4 0 .8.4.8.8v4.9c0 .5-.4.8-.8.8H8.5" />
+            </svg>
+          </button>
+          <button id="win-close" class="win-btn win-close" title="关闭" data-i18n-title="winCloseTitle">
+            <svg viewBox="0 0 12 12"><path d="m1.5 1.5 9 9m0-9-9 9" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- 每个页签一个 .tab-page 编辑器容器,堆叠常驻(保留滚动/撤销),切显隐 -->
+      <main id="editor-host"></main>
+      <footer class="statusbar">
+        <span id="status-left"></span>
+        <button id="status-blocks" class="status-blocks" hidden title="切换布局模式（显示/编辑布局信息块）"></button>
+        <span id="status-right"></span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

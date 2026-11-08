@@ -1,0 +1,106 @@
+/* styles/modules/slash-menu.css — slash 命令菜单
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/slash-menu.css
+ * (菜单挂在编辑器 portal 层,坐标由 slash-menu-view 计算)
+ */
+
+.slash-menu {
+  position: absolute;
+  z-index: 1200;
+  /* 滚动裁剪框:用 8px 同色 border 充当固定内边距——padding 会随内容滚走,
+     中部滚动态上下会贴边;border 常驻在可视框上,任意滚动位置边缘都留白。
+     卡片 1px 描边相应外移为由 box-shadow 外圈承担(0 0 0 1px)。 */
+  border: 8px solid var(--zt-surface);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  box-shadow:
+    0 0 0 1px var(--zt-border),
+    0 12px 28px -16px color-mix(in srgb, black 28%, transparent);
+  /* 原 min-width 210 为内容盒(加 padding/border 共 228),border-box 下换算保持内容区宽度不变 */
+  min-width: 228px;
+  /* 无全局 reset,显式声明:让 max-height 把 8px border 计入,offsetHeight 即真实总高(top 展开定位按它贴锚点) */
+  box-sizing: border-box;
+  max-height: 320px;
+  overflow: auto;
+  pointer-events: auto;
+  will-change: top, left, transform;
+}
+
+/* 可滚动但不显示滚动条;键盘/hover 导航与鼠标滚轮均不受影响。
+   editor.css 末尾的 .zt-md * 细滚动条规则会命中本元素且声明靠后,
+   故此处用 .zt-md .slash-menu 提升特异性压过它。 */
+.zt-md .slash-menu {
+  scrollbar-width: none;
+}
+
+.zt-md .slash-menu::-webkit-scrollbar {
+  display: none;
+}
+
+.slash-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--zt-radius);
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+/* 相邻菜单项之间留间隔,避免选中项与 hover 项圆角背景粘连 */
+.slash-menu-item + .slash-menu-item {
+  margin-top: 4px;
+}
+
+.slash-menu-item-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--zt-muted);
+}
+
+.slash-menu-item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.slash-menu-item-label {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.slash-menu-item-shortcut {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--zt-muted);
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.slash-menu-item:hover,
+.slash-menu-item[data-selected='true'] {
+  background: var(--zt-elevated);
+}
+
+.slash-menu-item:hover .slash-menu-item-icon,
+.slash-menu-item[data-selected='true'] .slash-menu-item-icon {
+  color: var(--zt-fg);
+}
+
+.slash-menu-group {
+  margin: 6px 6px 4px;
+  color: var(--zt-muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+@media (max-width: 767px) {
+  .slash-menu-item {
+    min-height: 44px;
+  }
+}

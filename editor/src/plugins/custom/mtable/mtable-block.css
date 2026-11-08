@@ -1,0 +1,171 @@
+/**
+ * mtable-block.css — CSV 表格块(mtable 节点)容器样式
+ *
+ * 表格内部视觉(mtable-wrapper 等)由 @meditor/mtable 自带;
+ * 这里只负责块级容器在文档流中的边框/间距/定高与选中态。
+ */
+
+.zt-md-mtable-block {
+  position: relative;
+  margin: 8px 0;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  overflow: hidden;
+  background: var(--zt-surface);
+}
+
+/* mtable 挂载宿主:宽度撑满;高度由 NodeView 按网格内容自适应
+ * (列头 + 行高合计,上限 300px,超出内部滚动),CSS 仅作回退值 */
+.zt-md-mtable-block .zt-md-mtable-host {
+  width: 100%;
+  height: 300px;
+}
+
+/* NodeSelection 选中态高亮 */
+.zt-md-mtable-block[data-selected="true"] {
+  border-color: var(--zt-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--zt-primary) 25%, transparent);
+}
+
+/* 只读态:隐藏 canvas 的可编辑光标语义 */
+.zt-md-mtable-block[data-editable="false"] .mtable-canvas {
+  cursor: default;
+}
+
+/*
+ * 左上角全屏按钮:覆盖行头列 × 列头行交叉的小方块
+ * (几何对齐 mtable 默认规格:行头宽 46 / 列头高 20),
+ * 默认透明,悬停显现图标与底色;点击弹出最大化 dialog。
+ */
+.zt-md-mtable-expand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* 悬停反馈:着色 + 显现全屏图标 */
+.zt-md-mtable-expand:hover {
+  color: var(--zt-muted);
+  background: var(--zt-bg-active);
+}
+
+.zt-md-mtable-expand:active {
+  color: var(--zt-fg);
+}
+
+.zt-md-mtable-expand:focus-visible {
+  outline: 2px solid var(--zt-primary);
+  outline-offset: -2px;
+}
+
+/* 只读态同样提供全屏查看入口,不隐藏 */
+
+/*
+ * 最大化 dialog:表格全屏编辑弹窗(样式对齐 image-upload-dialog 的弹层体系)
+ * ——宿主为 utils/dialog-host.ts 创建的 .zt-md.zt-md-dialog-host(fixed 全屏),
+ * 这里只负责遮罩与窗口壳。
+ */
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--zt-fg) 62%, transparent);
+  pointer-events: auto;
+}
+
+/* 暗色主题遮罩 */
+.zt-md-mtable-fullscreen-host.zt-md-dark .zt-md-mtable-fullscreen-overlay {
+  background: color-mix(in srgb, var(--zt-bg) 72%, transparent);
+}
+
+/*
+ * mtable 浮层(右键菜单/筛选面板):经 mtable.setOverlayContainer 挂进弹窗宿主,
+ * 保证盖过窗口壳(宿主 z-index 顶格,浮层挂 body 会被压在背面)。
+ * 宿主本身 pointer-events: none,浮层需显式恢复接收指针事件。
+ */
+.zt-md-mtable-fullscreen-host .mtable-context-menu,
+.zt-md-mtable-fullscreen-host .mtable-filter-panel {
+  pointer-events: auto;
+}
+
+/* 最大化窗口:占满视口(留少量边距透气),内部列布局 */
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-window {
+  box-sizing: border-box;
+  display: flex;
+  width: calc(100vw - 24px);
+  height: calc(100dvh - 24px);
+  min-height: calc(100vh - 24px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 78%, transparent);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--zt-fg) 22%, transparent);
+  pointer-events: auto;
+}
+
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-window *,
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-window *::before,
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-window *::after {
+  box-sizing: border-box;
+}
+
+/* 头部:标题 + 关闭按钮 */
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border) 60%, transparent);
+}
+
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--zt-fg);
+}
+
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--zt-radius);
+  color: var(--zt-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-close:hover {
+  color: var(--zt-fg);
+  background: color-mix(in srgb, var(--zt-fg) 10%, transparent);
+}
+
+/* 内容区:mtable 宿主(搬入)填满剩余空间 */
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px;
+}
+
+.zt-md-mtable-fullscreen-host .zt-md-mtable-fullscreen-body .zt-md-mtable-host {
+  width: 100%;
+  height: 100%;
+}

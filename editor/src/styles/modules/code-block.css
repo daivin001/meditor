@@ -1,0 +1,435 @@
+/* styles/modules/code-block.css — 代码块(悬浮操作栏/预览/Prism token 配色)
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/code-block.css
+ * (原版 Tailwind @apply 已翻译为等价纯 CSS)
+ */
+
+/* 代码块 = 一张圆角带边框卡片:header(顶部) + pre(内部透明代码区),视觉连成一体 */
+.zt-md-editor .zt-md-code-block {
+  position: relative;
+  display: flow-root;
+  /* 卡片与上下内容的间距:由卡片整体承担(pre 作为内部元素不再有外边距) */
+  margin-block: 0.75rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  /* 统一走 --zt-elevated(= fg 4% 混白,与 jsondata 表头同观感) */
+  background: var(--zt-elevated);
+}
+
+/* header 区域:语言触发钮(左) + 操作按钮(右),flex 垂直居中,底边为通栏分隔线;顶部圆角随卡片 */
+.zt-md-editor .zt-md-code-block-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 4px 1rem;
+  border-bottom: 1px solid var(--zt-border);
+  border-start-start-radius: var(--zt-radius);
+  border-start-end-radius: var(--zt-radius);
+  font-family: var(--zt-font);
+}
+
+/* 语言触发钮:默认只显示粗体纯文本,鼠标 hover 到触发钮区域才变下拉框观感 */
+.zt-md-editor .zt-md-code-block-lang-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 26px;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  padding: 0 0.5rem;
+  font-family: var(--zt-font);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+  /* 触发钮文字要与代码体文字(距卡片左缘 1rem)对齐:header 内容盒已在 1rem,
+     按钮自身左 padding 0.5rem,故只需左移 0.5rem 让按钮盒落在 0.5rem,文字恰好落在 1rem */
+  margin-inline-start: -0.5rem;
+}
+
+/* 鼠标 hover 到触发钮区域本身或展开时,才浮起淡底色 → 变下拉框 */
+.zt-md-editor .zt-md-code-block-lang-trigger:hover,
+.zt-md-editor .zt-md-code-block-lang-trigger[aria-expanded='true'] {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-editor .zt-md-code-block-lang-trigger-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 展开箭头:默认隐藏(纯文本态),hover 代码块/展开时浮现 */
+.zt-md-editor .zt-md-code-block-lang-trigger-icon {
+  display: inline-flex;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity 0.18s ease;
+}
+
+.zt-md-editor .zt-md-code-block-lang-trigger:hover .zt-md-code-block-lang-trigger-icon,
+.zt-md-editor .zt-md-code-block-lang-trigger[aria-expanded='true'] .zt-md-code-block-lang-trigger-icon {
+  opacity: 0.75;
+}
+
+/* 语言面板:header 相对浮层,点击触发钮时向下展开覆盖代码体 */
+.zt-md-editor .zt-md-code-block-lang-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 1rem;
+  z-index: 20;
+  width: 14rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  padding: 0.45rem;
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, black 32%, transparent);
+  transform-origin: top left;
+  animation: zt-md-code-block-lang-panel-in 120ms ease-out;
+}
+
+/* 操作按钮:默认隐藏,鼠标 hover 到代码块(不区分焦点)才浮起 */
+.zt-md-editor .zt-md-code-block-actions {
+  display: none;
+  align-items: center;
+  gap: 3px;
+}
+
+.zt-md-editor .zt-md-code-block:hover .zt-md-code-block-actions {
+  display: inline-flex;
+}
+
+.zt-md-editor .zt-md-code-block-actions[data-visible='false'] {
+  display: none;
+}
+
+.zt-md-editor .zt-md-code-block[data-editable='false'] .zt-md-code-block-editable-action,
+.zt-md-editor .zt-md-code-block-action-button[hidden] {
+  display: none;
+}
+
+/* 语言面板展开动画 */
+@keyframes zt-md-code-block-lang-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zt-md-editor .zt-md-code-block-lang-search {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-surface) 88%, var(--zt-bg));
+  padding: 0.28rem 0.4rem;
+}
+
+.zt-md-editor .zt-md-code-block-lang-search-icon {
+  opacity: 0.65;
+  flex-shrink: 0;
+}
+
+.zt-md-editor .zt-md-code-block-lang-search-input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--zt-fg);
+  font-family: var(--zt-font);
+  font-size: 0.78rem;
+  line-height: 1.25;
+  outline: none;
+}
+
+.zt-md-editor .zt-md-code-block-lang-search-input::placeholder {
+  color: color-mix(in srgb, var(--zt-muted) 86%, var(--zt-fg));
+}
+
+.zt-md-editor .zt-md-code-block-lang-options {
+  margin-top: 0.35rem;
+  max-height: 10.2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.zt-md-editor .zt-md-code-block-lang-option {
+  display: flex;
+  box-sizing: border-box;
+  height: 26px;
+  flex-shrink: 0;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  border: 0;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-fg);
+  padding: 0 0.42rem;
+  font-family: var(--zt-font);
+  font-size: 0.84rem;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zt-md-editor .zt-md-code-block-lang-option:hover,
+.zt-md-editor .zt-md-code-block-lang-option[data-selected='true'] {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-editor .zt-md-code-block-lang-option[data-active='true'] {
+  background: var(--zt-bg-active);
+}
+
+.zt-md-editor .zt-md-code-block-lang-option-check {
+  color: color-mix(in srgb, var(--zt-primary) 82%, var(--zt-fg));
+  flex-shrink: 0;
+}
+
+.zt-md-editor .zt-md-code-block-lang-empty {
+  color: var(--zt-muted);
+  font-family: var(--zt-font);
+  font-size: 0.78rem;
+  line-height: 1.25;
+  padding: 0.45rem 0.4rem 0.3rem;
+}
+
+@keyframes zt-md-code-block-lang-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 操作按钮:header 流内右侧,垂直居中 */
+.zt-md-editor .zt-md-code-block-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-fg);
+  transition: background-color 0.18s ease, color 0.18s ease;
+  cursor: pointer;
+}
+
+.zt-md-editor .zt-md-code-block-action-button:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-editor .zt-md-code-block-action-button[data-copied='true'] {
+  background: var(--zt-bg-active);
+  color: var(--zt-primary);
+}
+
+.zt-md-editor .zt-md-code-block-action-button[data-active='true'] {
+  background: var(--zt-bg-active);
+  color: var(--zt-primary);
+}
+
+.zt-md-editor .zt-md-code-block-action-button-danger:hover {
+  background: color-mix(in srgb, var(--zt-destructive) 18%, var(--zt-surface));
+  color: var(--zt-destructive);
+}
+
+.zt-md-editor .zt-md-code-block-action-button svg {
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-code-block-preview {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-end-start-radius: var(--zt-radius);
+  border-end-end-radius: var(--zt-radius);
+  background: var(--zt-bg);
+}
+
+.zt-md-editor .zt-md-code-block-preview[hidden] {
+  display: none;
+}
+
+.zt-md-editor .zt-md-code-block[data-view-mode='preview'] {
+  height: calc(min(24rem, 60vh) + 1.5rem);
+}
+
+.zt-md-editor .zt-md-code-block[data-view-mode='preview'] > pre {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-code-block-preview-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+.zt-md-light .zt-md-code-block-preview-frame {
+  color-scheme: light;
+}
+
+.zt-md-dark .zt-md-code-block-preview-frame {
+  color-scheme: dark;
+}
+
+.zt-md-editor .ProseMirror pre {
+  /* 代码体是卡片内部区域:透明背景,无独立边框/圆角,与 header 融为一体 */
+  margin-block: 0;
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  padding-inline: 1rem;
+  padding-block: 0.6rem 0.75rem;
+  background: transparent;
+  color: var(--zt-fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.92em;
+  line-height: 1.7;
+  tab-size: 4;
+  white-space: pre;
+}
+
+.zt-md-editor .ProseMirror pre code {
+  display: block;
+  min-width: max-content;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  white-space: pre;
+}
+
+/* 自动换行(data-wrap='on'):长行折行显示,不横向滚动。 */
+.zt-md-editor .zt-md-code-block[data-wrap='on'] .ProseMirror pre,
+.zt-md-editor .zt-md-code-block[data-wrap='on'] pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+}
+
+.zt-md-editor .zt-md-code-block[data-wrap='on'] pre code {
+  white-space: pre-wrap;
+  min-width: 0;
+}
+
+/* 行号(data-line-numbers='on'):左侧行号槽 + pre 让位。 */
+.zt-md-editor .zt-md-code-block[data-line-numbers='on'] {
+  position: relative;
+}
+
+.zt-md-editor .zt-md-code-block[data-line-numbers='on'] pre {
+  padding-left: calc(1rem + 2.8em);
+}
+
+.zt-md-code-block-gutter {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  width: calc(1rem + 2.3em);
+  overflow: hidden;
+  padding-right: 0.5em;
+  text-align: right;
+  color: color-mix(in srgb, var(--zt-muted) 72%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.92em;
+  line-height: 1.7;
+  pointer-events: none;
+  user-select: none;
+}
+
+.zt-md-code-block-gutter-line {
+  position: absolute;
+  right: 0.5em;
+  white-space: nowrap;
+}
+
+/* Prism token 配色:全部走 --zt-* 令牌 color-mix,自动适配 light/dark */
+.zt-md-editor .ProseMirror pre .token.comment,
+.zt-md-editor .ProseMirror pre .token.prolog,
+.zt-md-editor .ProseMirror pre .token.doctype,
+.zt-md-editor .ProseMirror pre .token.cdata {
+  color: color-mix(in srgb, var(--zt-muted) 82%, var(--zt-fg));
+}
+
+.zt-md-editor .ProseMirror pre .token.punctuation,
+.zt-md-editor .ProseMirror pre .token.operator {
+  color: color-mix(in srgb, var(--zt-fg) 72%, var(--zt-muted));
+}
+
+.zt-md-editor .ProseMirror pre .token.property,
+.zt-md-editor .ProseMirror pre .token.tag,
+.zt-md-editor .ProseMirror pre .token.boolean,
+.zt-md-editor .ProseMirror pre .token.number,
+.zt-md-editor .ProseMirror pre .token.constant,
+.zt-md-editor .ProseMirror pre .token.symbol {
+  color: color-mix(in srgb, var(--zt-primary) 82%, var(--zt-fg));
+}
+
+.zt-md-editor .ProseMirror pre .token.selector,
+.zt-md-editor .ProseMirror pre .token.attr-name,
+.zt-md-editor .ProseMirror pre .token.string,
+.zt-md-editor .ProseMirror pre .token.char,
+.zt-md-editor .ProseMirror pre .token.builtin,
+.zt-md-editor .ProseMirror pre .token.inserted {
+  color: color-mix(in srgb, var(--zt-secondary) 80%, var(--zt-fg));
+}
+
+.zt-md-editor .ProseMirror pre .token.atrule,
+.zt-md-editor .ProseMirror pre .token.attr-value,
+.zt-md-editor .ProseMirror pre .token.keyword {
+  color: color-mix(in srgb, var(--zt-primary) 72%, var(--zt-secondary));
+}
+
+.zt-md-editor .ProseMirror pre .token.function,
+.zt-md-editor .ProseMirror pre .token.class-name {
+  color: color-mix(in srgb, var(--zt-fg) 80%, var(--zt-primary));
+}
+
+.zt-md-editor .ProseMirror pre .token.regex,
+.zt-md-editor .ProseMirror pre .token.important,
+.zt-md-editor .ProseMirror pre .token.variable {
+  color: color-mix(in srgb, var(--zt-secondary) 64%, var(--zt-primary));
+}
+
+.zt-md-editor .ProseMirror pre .token.deleted {
+  color: var(--zt-destructive);
+}
+
+
+/* Mermaid 渲染失败提示(预览容器内的错误条) */
+.zt-md .zt-md-code-block-preview .zt-md-code-block-preview-error {
+  padding: 12px 16px;
+  font-size: 0.85em;
+  color: #c0392b;
+  background: color-mix(in srgb, #c0392b 8%, transparent);
+  border-radius: var(--zt-radius);
+  overflow-wrap: anywhere;
+}

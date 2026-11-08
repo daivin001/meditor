@@ -1,0 +1,45 @@
+{
+  "name": "@meditor/mtable",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Mtable — Canvas 渲染的 CSV 表格编辑器组件包（视觉规格对齐 Univer Sheets）",
+  "main": "./dist/mtable.js",
+  "module": "./dist/mtable.js",
+  "types": "./dist-types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist/mtable.js"
+    },
+    "./style.css": "./dist/mtable.css"
+  },
+  "files": [
+    "dist",
+    "dist-types",
+    "README.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "build": "tsc -p tsconfig.build.json && vite build"
+  },
+  "keywords": [
+    "csv",
+    "spreadsheet",
+    "editor",
+    "canvas",
+    "meditor"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "@meditor/csvkit": "^0.1.0"
+  }
+}

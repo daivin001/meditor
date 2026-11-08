@@ -1,0 +1,64 @@
+/* styles/modules/heading-numbering.css — 标题自动编号(Typora 风偏好)
+ *
+ * wrapper 挂 data-heading-numbering='on' 后启用:CSS counter 对 h1~h6 编号,
+ * 层级形如 `1.` / `1.1` / `1.1.1`;仅影响显示,markdown 内容不变。
+ */
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror {
+  counter-reset: zt-md-h1 zt-md-h2 zt-md-h3 zt-md-h4 zt-md-h5 zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h1 {
+  counter-increment: zt-md-h1;
+  counter-reset: zt-md-h2 zt-md-h3 zt-md-h4 zt-md-h5 zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h2 {
+  counter-increment: zt-md-h2;
+  counter-reset: zt-md-h3 zt-md-h4 zt-md-h5 zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h3 {
+  counter-increment: zt-md-h3;
+  counter-reset: zt-md-h4 zt-md-h5 zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h4 {
+  counter-increment: zt-md-h4;
+  counter-reset: zt-md-h5 zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h5 {
+  counter-increment: zt-md-h5;
+  counter-reset: zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h6 {
+  counter-increment: zt-md-h6;
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h1::before {
+  content: counter(zt-md-h1) '. ';
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h2::before {
+  content: counter(zt-md-h1) '.' counter(zt-md-h2) ' ';
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h3::before {
+  content: counter(zt-md-h1) '.' counter(zt-md-h2) '.' counter(zt-md-h3) ' ';
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h4::before {
+  content: counter(zt-md-h1) '.' counter(zt-md-h2) '.' counter(zt-md-h3) '.' counter(zt-md-h4) ' ';
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h5::before {
+  content: counter(zt-md-h1) '.' counter(zt-md-h2) '.' counter(zt-md-h3) '.' counter(zt-md-h4) '.'
+    counter(zt-md-h5) ' ';
+}
+
+.zt-md[data-heading-numbering='on'] .zt-md-editor .ProseMirror h6::before {
+  content: counter(zt-md-h1) '.' counter(zt-md-h2) '.' counter(zt-md-h3) '.' counter(zt-md-h4) '.'
+    counter(zt-md-h5) '.' counter(zt-md-h6) ' ';
+}

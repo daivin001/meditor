@@ -1,0 +1,4 @@
+# 360 杀毒会实时锁定 target/ 下新链接出的 exe(曾把 schemars 构建产物
+# 隔离成无法删除的文件),故构建目录固定到 target2 避开历史污染。
+[build]
+target-dir = "target2"

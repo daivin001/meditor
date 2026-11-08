@@ -1,0 +1,233 @@
+/* styles/modules/image.css — 图片节点(操作按钮/缩放把手/加载与错误态)
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/image.css
+ * (原版 Tailwind @apply 已翻译为等价纯 CSS)
+ */
+
+/* 图片是行内原子节点:按 inline-block 参与行内排版,段落里可在同一行前后
+ * 继续输入文字/插入其他行内元素;宽度百分比与说明文字都相对该盒子,缩放时
+ * 整体(图 + 说明)一起变宽变窄并保持说明文字居中。
+ * 始终保持行内还有一个原因:图片是段落最后一个子节点时 ProseMirror 会追加
+ * 游标辅助节点(img/br),行内排版下它们与图片同处一行,不会像 display:block
+ * 那样在其下方多挤出一个空行。 */
+.zt-md-editor .zt-md-image {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  width: fit-content;
+  margin-block: 0.75rem;
+  line-height: 0;
+  vertical-align: top;
+}
+
+/* 图片独占所在段落时整行居中,保持与旧版块级图片一致的视觉;
+ * 同段落一旦出现文字/其他元素,data-solo 即被移除,退回靠左行内排版。 */
+.zt-md-editor *:has(> .zt-md-image[data-solo='true']) {
+  text-align: center;
+}
+
+.zt-md-editor .zt-md-image[data-selected='true'] {
+  outline: 1px solid color-mix(in srgb, var(--zt-primary) 55%, var(--zt-border));
+  outline-offset: 2px;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'],
+.zt-md-editor .zt-md-image[data-load-error='true'] {
+  width: min(100%, 320px);
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 78%, transparent);
+  border-radius: calc(var(--zt-radius) + 2px);
+  background: color-mix(in srgb, var(--zt-muted) 10%, var(--zt-surface));
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'] {
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-image[data-load-error='true']:not([data-loading='true']) {
+  aspect-ratio: 2 / 1;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'][data-selected='true'] {
+  outline: 0;
+  box-shadow: none;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true']::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--zt-bg-hover);
+  animation: zt-md-image-placeholder-shimmer 1.2s ease-in-out infinite alternate;
+}
+
+.zt-md-editor .zt-md-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-elevated);
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'] img,
+.zt-md-editor .zt-md-image[data-load-error='true'] img {
+  display: none;
+}
+
+.zt-md-editor .zt-md-image-load-error {
+  display: none;
+}
+
+.zt-md-editor .zt-md-image[data-load-error='true'] .zt-md-image-load-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--zt-muted);
+  font-size: 13px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'][data-load-error='true'] .zt-md-image-load-error {
+  display: none;
+}
+
+.zt-md-editor .zt-md-image-load-error svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.zt-md-editor .zt-md-image[data-has-width='true'] img {
+  width: 100%;
+}
+
+.zt-md-editor .zt-md-image-actions {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  z-index: 20;
+  display: inline-flex;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-image[data-editable='true']:hover .zt-md-image-actions,
+.zt-md-editor .zt-md-image[data-editable='true']:focus-within .zt-md-image-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'] .zt-md-image-actions {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-image-action-button {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  color: var(--zt-muted);
+  cursor: pointer;
+}
+
+.zt-md-editor .zt-md-image-action-button-danger:hover {
+  background: color-mix(in srgb, var(--zt-destructive) 12%, var(--zt-surface));
+  color: var(--zt-destructive);
+  border-color: color-mix(in srgb, var(--zt-destructive) 35%, var(--zt-border));
+}
+
+.zt-md-editor .zt-md-image-action-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.zt-md-editor .zt-md-image-resize-handle {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  width: 0.25rem;
+  height: 2.75rem;
+  max-height: calc(100% - 1rem);
+  min-height: 1.75rem;
+  background: var(--zt-primary);
+  border-radius: 2px;
+  cursor: ew-resize;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.zt-md-editor .zt-md-image-resize-handle-left {
+  left: 0.5rem;
+}
+
+.zt-md-editor .zt-md-image-resize-handle-right {
+  right: 0.5rem;
+}
+
+.zt-md-editor .zt-md-image[data-editable='true']:hover .zt-md-image-resize-handle,
+.zt-md-editor .zt-md-image[data-editable='true']:focus-within .zt-md-image-resize-handle,
+.zt-md-editor .zt-md-image[data-editable='true'][data-resizing='true'] .zt-md-image-resize-handle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zt-md-editor .zt-md-image[data-loading='true'] .zt-md-image-resize-handle,
+.zt-md-editor .zt-md-image[data-load-error='true'] .zt-md-image-resize-handle {
+  display: none;
+}
+
+@keyframes zt-md-image-placeholder-shimmer {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 0.8;
+  }
+}
+
+/* 图片说明(caption,绑定节点 alt 属性)。
+ * 宽度不做下限约束:说明盒必须始终等于图片盒子宽度,才能在图片下方居中、
+ * 并跟随图片缩放一起移动;一旦设置 min-width,窄图下说明盒会被撑开溢出到
+ * 图片右侧(文字偏右不居中),且缩放时被下限卡住不再跟随。 */
+.zt-md-editor .zt-md-image-caption {
+  display: block;
+  line-height: 1.6;
+  margin-top: 6px;
+  padding: 0 2px;
+  color: var(--zt-muted);
+  font-size: 0.86em;
+  text-align: center;
+  outline: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.zt-md-editor .zt-md-image-caption:empty::before {
+  content: attr(data-placeholder);
+  color: var(--zt-muted);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-image-caption:focus {
+  color: var(--zt-fg);
+}
+
+.zt-md-editor .zt-md-image-caption:focus:empty::before {
+  opacity: 0.4;
+}

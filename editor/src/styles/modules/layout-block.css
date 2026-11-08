@@ -1,0 +1,185 @@
+/* styles/modules/layout-block.css — 显示控制布局块(meditor-layout 围栏)
+ *
+ * - 正常编辑模式完全隐藏(零占位):display:none,光标导航/删除保护由
+ *   layout-block-behavior 插件补偿;
+ * - 仅布局模式(wrapper data-layout-mode="on")下显示为「info string 徽标 +
+ *   行数 + 删除按钮 + 源码编辑区」面板,供编辑纯展示控制信息。
+ */
+
+.zt-md .zt-md-layout-block {
+  display: none;
+}
+
+/* 布局模式下展开为可编辑面板 */
+.zt-md[data-layout-mode='on'] .zt-md-layout-block {
+  display: block;
+  margin-block: 0.75rem;
+  border: 1px dashed var(--zt-primary);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  overflow: hidden;
+}
+
+.zt-md[data-layout-mode='on'] .zt-md-layout-block[data-selected='true'] {
+  box-shadow: 0 0 0 2px var(--zt-primary);
+}
+
+/* 头部行 */
+.zt-md .zt-md-layout-block-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--zt-border);
+  background: var(--zt-bg);
+}
+
+/* info string 徽标 */
+.zt-md .zt-md-layout-block-lang {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-primary) 12%, transparent);
+  color: var(--zt-primary);
+  font-family: var(--zt-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  user-select: none;
+}
+
+/* 行数徽标 */
+.zt-md .zt-md-layout-block-lines {
+  color: var(--zt-muted);
+  font-size: 0.72rem;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.zt-md .zt-md-layout-block-spacer {
+  flex: 1;
+}
+
+/* 删除按钮 */
+.zt-md .zt-md-layout-block-delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  cursor: pointer;
+}
+
+.zt-md .zt-md-layout-block-delete:hover:not(:disabled) {
+  background: var(--zt-bg-hover);
+  color: var(--zt-destructive);
+}
+
+.zt-md .zt-md-layout-block-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 源码编辑区 */
+.zt-md .zt-md-layout-block-editor {
+  display: block;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.5rem 0.65rem;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--zt-fg);
+  font-family: var(--zt-font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ===== 阶段二:渲染效果 ===== */
+
+/* HTML 沙箱展示卡:正常模式(html kind 且非布局模式,dom data-view='render')
+ * 以渲染卡可见;面板与渲染卡互斥显示。 */
+.zt-md .zt-md-layout-block[data-view='render'] {
+  display: block;
+  margin-block: 0.75rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  overflow: hidden;
+}
+
+.zt-md .zt-md-layout-block[data-view='render'] .zt-md-layout-block-panel {
+  display: none;
+}
+
+.zt-md .zt-md-layout-block-render {
+  display: none;
+}
+
+.zt-md .zt-md-layout-block[data-view='render'] .zt-md-layout-block-render {
+  display: block;
+}
+
+.zt-md .zt-md-layout-block-render iframe {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  max-height: 720px;
+  border: none;
+  background: transparent;
+}
+
+/* 文档级宽度指令(wrapper data-ml-width,由 layout-block-effect 插件同步):
+ * 镜像 client 超宽模式的 padding 公式,narrow/wide 限宽居中,full 铺满。 */
+.zt-md[data-ml-width='narrow'] .zt-md-editor {
+  padding-left: max(3.25rem, calc((100% - 680px) / 2));
+  padding-right: max(1.25rem, calc((100% - 680px) / 2));
+}
+
+.zt-md[data-ml-width='wide'] .zt-md-editor {
+  padding-left: max(3.25rem, calc((100% - 1100px) / 2));
+  padding-right: max(1.25rem, calc((100% - 1100px) / 2));
+}
+
+.zt-md[data-ml-width='full'] .zt-md-editor {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+/* 区块级宽度指令(Decoration.node class):块自身限宽/铺满。 */
+.zt-md-editor .ProseMirror > .zt-md-ml-w-narrow {
+  max-width: 680px;
+  margin-inline: auto;
+}
+
+.zt-md-editor .ProseMirror > .zt-md-ml-w-wide {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+.zt-md-editor .ProseMirror > .zt-md-ml-w-full {
+  max-width: none;
+}
+
+/* 隐藏指令:正常模式隐藏作用域内容;布局模式保持可见以便定位与修复。 */
+.zt-md:not([data-layout-mode='on']) .zt-md-editor .ProseMirror > .zt-md-ml-hidden {
+  display: none;
+}
+
+/* 对齐指令(作用域内容文本对齐)。 */
+.zt-md-editor .ProseMirror > .zt-md-ml-align-center {
+  text-align: center;
+}
+
+.zt-md-editor .ProseMirror > .zt-md-ml-align-right {
+  text-align: right;
+}

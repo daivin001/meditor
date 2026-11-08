@@ -1,0 +1,907 @@
+/*
+ * src/app.css — MEditor 桌面壳布局样式
+ *
+ * 只负责应用内工具栏/状态栏/整体布局;编辑器内部视觉全部来自
+ * vendor/meditor/meditor.css。明暗主题通过 [data-theme] 切换壳层配色。
+ */
+
+:root {
+  --bg: #f8f9fb;
+  --bar-bg: #ffffff;
+  --bar-border: #e3e6ec;
+  --text: #1f2329;
+  --text-dim: #8a919f;
+  --accent: #2f6fed;
+  --accent-hover: #eef3ff;
+  /* 记事本式着色标题栏:条底为淡蓝,活动页签用内容底色形成"连通"效果 */
+  --titlebar-bg: #d7e7f4;
+  --strip-hover: rgba(255, 255, 255, 0.55);
+  --tab-divider: rgba(31, 35, 41, 0.09);
+}
+
+:root[data-theme='dark'] {
+  --bg: #1e2023;
+  --bar-bg: #26282c;
+  --bar-border: #383b41;
+  --text: #e8eaed;
+  --text-dim: #9aa0a8;
+  --accent: #6a9bff;
+  --accent-hover: #30363f;
+  --titlebar-bg: #283043;
+  --strip-hover: rgba(255, 255, 255, 0.07);
+  --tab-divider: rgba(255, 255, 255, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    'Segoe UI',
+    'Microsoft YaHei',
+    system-ui,
+    sans-serif;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  /* 无边框窗口:细描边区分桌面背景,最大化时去掉 */
+  border: 1px solid var(--bar-border);
+}
+
+body.maximized #app {
+  border: none;
+}
+
+#titlebar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 42px;
+  padding-left: 10px;
+  background: var(--titlebar-bg);
+  user-select: none;
+  flex: none;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  flex: none;
+}
+
+.brand-mark:hover {
+  background: var(--strip-hover);
+}
+
+.brand-mark:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.brand-mark svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+#tabstrip {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 4px;
+  overflow: hidden;
+}
+
+#tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  /* 作为 .tab 的 offsetParent,供活动页签滚入视野计算 */
+  position: relative;
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  /* 比标题栏矮一截,顶部留出条底色间隙;底部保持与内容区连通 */
+  height: 36px;
+  padding: 0 6px 0 14px;
+  min-width: 120px;
+  max-width: 200px;
+  flex: 0 1 auto;
+  border-radius: 9px 9px 0 0;
+  color: var(--text);
+  font-size: 12px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.tab:hover {
+  background: var(--strip-hover);
+}
+
+/* 非活动页签之间的细分隔线:仅夹在两个非活动页签之间时绘制,
+   自己或左侧邻居被悬停时隐藏 */
+.tab:not(.active) + .tab:not(.active)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 16px;
+  background: var(--tab-divider);
+}
+
+.tab:not(.active):hover::before,
+.tab:not(.active):has(+ .tab:hover)::before {
+  display: none;
+}
+
+/* 活动页签:内容底色 + 顶部圆角,与下方编辑区"连通"(记事本样式) */
+.tab.active,
+.tab.active:hover {
+  background: var(--bg);
+}
+
+.tab.active .tab-title {
+  font-weight: 600;
+}
+
+.tab-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 脏标记:标题前小圆点(仅脏页签显示) */
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+  display: none;
+}
+
+.tab.dirty .tab-dot {
+  display: block;
+}
+
+.tab-close,
+.tab-new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  flex: none;
+}
+
+.tab-close {
+  width: 20px;
+  height: 20px;
+  /* 关闭按钮:仅活动页签或悬停中的非活动页签显示(记事本行为) */
+  display: none;
+  /* 图标用灰色弱化,悬停再加深 */
+  color: var(--text-dim);
+}
+
+.tab.active .tab-close,
+.tab:not(.active):hover .tab-close {
+  display: inline-flex;
+}
+
+.tab-close svg {
+  width: 10px;
+  height: 10px;
+}
+
+.tab-new {
+  width: 28px;
+  height: 28px;
+  /* 与页签内关闭按钮垂直对齐(关闭按钮中心在页签 36px 高度的中点) */
+  margin-bottom: 4px;
+  color: var(--text-dim);
+}
+
+.tab-new svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* 页签溢出时的左右滚动箭头(默认隐藏,由脚本按溢出状态显隐) */
+.tab-scroll {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 28px;
+  margin-bottom: 4px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex: none;
+}
+
+.tab-scroll[hidden] {
+  display: none;
+}
+
+.tab-scroll:hover {
+  background: var(--strip-hover);
+  color: var(--text);
+}
+
+.tab-scroll svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.tab-close:hover {
+  background: rgba(31, 35, 41, 0.1);
+  color: var(--text);
+}
+
+:root[data-theme='dark'] .tab-close:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text);
+}
+
+.tab-new:hover {
+  background: var(--strip-hover);
+  color: var(--text);
+}
+
+.tab-close svg,
+.tab-new svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* --- 窗口控制(最小化/最大化/关闭) --- */
+
+.win-controls {
+  display: flex;
+  align-self: stretch;
+  margin-left: auto;
+  flex: none;
+}
+
+.win-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.win-btn svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.win-btn:hover {
+  background: var(--strip-hover);
+  color: var(--text);
+}
+
+.win-btn.win-close:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+/* 最大化/还原图标随窗口状态切换 */
+.win-btn .ic-restore {
+  display: none;
+}
+
+body.maximized .win-btn .ic-restore {
+  display: block;
+}
+
+body.maximized .win-btn .ic-max {
+  display: none;
+}
+
+/* 编辑区占满剩余空间,内部滚动由 meditor 自理。
+   多页签:每页签一个 .tab-page 绝对定位堆叠,切显隐不用 display:none,
+   隐藏页签保持布局可测量(编辑器度量不塌),滚动/撤销状态随之保留。 */
+#editor-host {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.tab-page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.tab-page.active {
+  visibility: visible;
+}
+
+/*
+ * 布局模式:
+ *  - full(全屏):编辑区占满窗口宽度(默认)
+ *  - wide(超宽):类 Typora 居中限宽。内容上限 900px(对齐 Typora 正文
+ *    常用的 800~900px 量级);最小宽度由窗口 minWidth 640px 兜底。
+ *    实现上只加大编辑器内边距把内容挤向居中,滚动容器仍占满整列,
+ *    滚动条贴窗口右缘;左 padding 下限保留块手柄列(3.25rem)。
+ */
+#editor-host[data-layout='wide'] .zt-md-editor {
+  padding-left: max(3.25rem, calc((100% - 900px) / 2));
+  padding-right: max(1.25rem, calc((100% - 900px) / 2));
+}
+
+/*
+ * 有底色块统一:代码块/行内代码/公式块/图片占位等 meditor 原用
+ * --zt-elevated(比正文底色深一档的灰),统一覆写为工具栏底色 --zt-bg,
+ * 所有带底色的块与工具栏观感一致。仅浅色主题(深色下 elevated 本就
+ * 比背景浅,无此问题)。
+ */
+#editor-host .zt-md.zt-md-light {
+  --zt-elevated: var(--zt-bg);
+}
+
+/* 状态栏布局块计数(文档含 meditor-layout 块时显示,点击切换布局模式) */
+.status-blocks {
+  flex: none;
+  padding: 1px 8px;
+  border: 1px solid var(--bar-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.status-blocks[hidden] {
+  display: none;
+}
+
+.status-blocks:hover {
+  background: var(--accent-hover);
+}
+
+/* --- 菜单(logo 弹出):新建/打开/保存/复制/布局/主题 --- */
+
+.menu-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.menu-pop {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 248px;
+  padding: 4px;
+  background: var(--bar-bg);
+  border: 1px solid var(--bar-border);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  z-index: 100;
+}
+
+.menu-pop[hidden] {
+  display: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-item:hover {
+  background: var(--accent-hover);
+}
+
+/* 开关型菜单项勾选态(布局模式/全屏/超宽) */
+.menu-item.active {
+  background: var(--accent-hover);
+  color: var(--accent);
+}
+
+.menu-item .kbd {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--bar-border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: Consolas, monospace;
+  color: var(--text-dim);
+  background: var(--bg);
+}
+
+.menu-sep {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--bar-border);
+}
+
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bar-bg);
+  border-top: 1px solid var(--bar-border);
+  user-select: none;
+  flex: none;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.statusbar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ===== 菜单:最近文件区 ===== */
+
+.menu-recent-title {
+  padding: 6px 12px 2px;
+  font-size: 11px;
+  opacity: 0.55;
+}
+
+.menu-recent-empty {
+  padding: 6px 12px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+.menu-recent-item {
+  font-size: 12.5px;
+}
+
+/* ===== 设置面板 ===== */
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* [hidden] 属性的 UA display:none 会被上面的 display:flex 覆盖(作者样式优先),
+   必须显式写回,否则 hidden = true 后遮罩仍显示(设置框永远关不掉)。 */
+.settings-overlay[hidden] {
+  display: none;
+}
+
+.settings-panel {
+  width: min(520px, calc(100vw - 48px));
+  height: min(680px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: var(--bar-bg);
+  color: var(--text);
+  border: 1px solid var(--bar-border);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+/* --- 设置对话框:顶部 Header(标题 + 关闭) --- */
+
+.settings-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--bar-border);
+  flex-shrink: 0;
+}
+
+.settings-dialog-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-dialog-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.settings-dialog-close:hover {
+  background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.settings-dialog-close svg {
+  display: block;
+}
+
+/* --- 设置对话框:中部内容区(滚动) --- */
+
+.settings-dialog-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+}
+
+/* --- 设置对话框:底部按钮栏 --- */
+
+.settings-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--bar-border);
+  flex-shrink: 0;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-row-block {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.settings-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings-label-block {
+  font-weight: 600;
+}
+
+.settings-segment {
+  display: inline-flex;
+  border: 1px solid var(--bar-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.settings-segment-item {
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.settings-segment-item + .settings-segment-item {
+  border-left: 1px solid var(--bar-border);
+}
+
+.settings-segment-item[data-active='true'] {
+  background: #2f4ea8;
+  color: #ffffff;
+}
+
+.settings-toggle {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 21px;
+  cursor: pointer;
+}
+
+.settings-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-toggle-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: #c9c9ce;
+  transition: background 0.15s ease;
+}
+
+.settings-toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.15s ease;
+}
+
+.settings-toggle input:checked + .settings-toggle-slider {
+  background: #2f4ea8;
+}
+
+.settings-toggle input:checked + .settings-toggle-slider::before {
+  transform: translateX(17px);
+}
+
+.settings-css-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--bar-border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: inherit;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.settings-hint {
+  font-size: 11.5px;
+  opacity: 0.55;
+}
+
+.settings-close {
+  padding: 7px 22px;
+  border: none;
+  border-radius: 8px;
+  background: #2f4ea8;
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.settings-close:hover {
+  background: #27418c;
+}
+
+/* --- 设置面板:分区/新增控件 --- */
+
+.settings-section {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--bar-border);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.6;
+}
+
+.settings-select,
+.settings-input {
+  max-width: 62%;
+  padding: 5px 9px;
+  border: 1px solid var(--bar-border);
+  border-radius: 7px;
+  background: var(--bg);
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.settings-row-block .settings-select,
+.settings-row-block .settings-input {
+  max-width: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-input::placeholder {
+  opacity: 0.45;
+}
+
+.settings-button {
+  padding: 5px 14px;
+  border: 1px solid var(--bar-border);
+  border-radius: 7px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.settings-button:hover {
+  border-color: #2f4ea8;
+  color: #2f4ea8;
+}
+
+.settings-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.settings-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-stepper .settings-button {
+  padding: 3px 10px;
+}
+
+.settings-stepper-value {
+  min-width: 44px;
+  text-align: center;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-hint-row {
+  font-size: 11.5px;
+  opacity: 0.55;
+  margin-top: -6px;
+}
+
+/* ===== 设置:AI 模型清单 ===== */
+
+.settings-ai-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.settings-ai-empty {
+  padding: 8px 10px;
+  border: 1px dashed var(--bar-border);
+  border-radius: 8px;
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.settings-ai-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+  padding: 10px 34px 10px 12px;
+  border: 1px solid var(--bar-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, currentColor 3%, transparent);
+}
+
+.settings-ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-ai-field-label {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.settings-ai-field .settings-input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 12.5px;
+  padding: 4px 8px;
+}
+
+.settings-ai-delete {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.55;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.settings-ai-delete:hover {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 9%, transparent);
+}
+
+.settings-ai-add-row {
+  display: flex;
+}
+
+.settings-ai-add-row .settings-button {
+  padding: 4px 12px;
+  font-size: 12.5px;
+}
+
+/* 打印 iframe(隐藏) */
+#print-frame {
+  visibility: hidden;
+}

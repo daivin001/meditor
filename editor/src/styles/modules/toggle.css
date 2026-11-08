@@ -1,0 +1,83 @@
+/* styles/modules/toggle.css — 折叠块(Toggle,<details> 往返)
+ *
+ * - 折叠展开是运行时状态:容器 data-open 控制,不进文档;
+ * - 标题行内编辑(业务数据),只读态仅禁编辑不禁折叠。
+ */
+
+.zt-md-editor .zt-md-toggle {
+  margin-block: 0.75rem;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: transparent;
+}
+
+/* 头部行 */
+.zt-md-editor .zt-md-toggle-header {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.zt-md-editor .zt-md-toggle-fold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+
+.zt-md-editor .zt-md-toggle[data-open='true'] .zt-md-toggle-fold {
+  transform: rotate(90deg);
+}
+
+.zt-md-editor .zt-md-toggle-fold:hover {
+  background: var(--zt-bg-hover);
+  color: var(--zt-fg);
+}
+
+/* 标题(行内编辑) */
+.zt-md-editor .zt-md-toggle-summary {
+  flex: 1;
+  min-height: 1.5em;
+  font-weight: 600;
+  outline: none;
+  word-break: break-word;
+}
+
+.zt-md-editor .zt-md-toggle-summary:empty::before {
+  content: attr(data-placeholder);
+  color: var(--zt-muted);
+  opacity: 0.65;
+  font-weight: 400;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-toggle[data-editable='false'] .zt-md-toggle-summary {
+  min-height: 0;
+}
+
+/* 内容区:折叠时隐藏(纯展示状态) */
+.zt-md-editor .zt-md-toggle[data-open='false'] .zt-md-toggle-content {
+  display: none;
+}
+
+.zt-md-editor .zt-md-toggle-content {
+  padding: 0.15rem 0.5rem 0.5rem 1.85rem;
+}
+
+.zt-md-editor .zt-md-toggle-content > :first-child {
+  margin-top: 0;
+}
+
+.zt-md-editor .zt-md-toggle-content > :last-child {
+  margin-bottom: 0;
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEditor Typora 对齐特性 dev 测试页</title>
+    <script>
+      // 早期 console 钩子:捕获编辑器初始化失败日志(经典脚本先于模块执行)。
+      window.__consoleErrors = [];
+      window.__consoleInfos = [];
+      (function () {
+        var orig = console.error;
+        console.error = function () {
+          window.__consoleErrors.push(
+            Array.prototype.map.call(arguments, function (a) {
+              return a instanceof Error ? a.stack || String(a) : typeof a === 'object' ? JSON.stringify(a) : String(a);
+            }).join(' ')
+          );
+          orig.apply(console, arguments);
+        };
+        var origInfo = console.info;
+        console.info = function () {
+          window.__consoleInfos.push(
+            Array.prototype.map.call(arguments, function (a) {
+              return typeof a === 'object' ? JSON.stringify(a) : String(a);
+            }).join(' ')
+          );
+          origInfo.apply(console, arguments);
+        };
+      })();
+    </script>
+    <script type="module" src="/src/dev-feature-test.ts"></script>
+  </head>
+  <body style="margin: 0; padding: 24px; background: #f5f6f8">
+    <div id="app"></div>
+  </body>
+</html>

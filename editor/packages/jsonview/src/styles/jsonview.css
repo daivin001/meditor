@@ -1,0 +1,1613 @@
+/* styles/jsonview.css — @meditor/jsonview 数据库视图块样式
+ *
+ * 令牌优先消费 meditor 的 --zt-* 变量(在编辑器内),并给独立消费场景留字面量兜底。
+ */
+
+.zt-jsonview-wrapper {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  margin-block: 0.25rem;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: var(--zt-radius, 6px);
+  background: var(--zt-surface, #ffffff);
+  color: var(--zt-fg, #1f2937);
+  font-family: var(--zt-font, inherit);
+  font-size: 13.5px;
+  line-height: 1.5;
+  overflow: auto;
+}
+
+/* ===== 自定义下拉(替代原生 select):触发钮基类(置于各变体类之前,变体可覆盖) ===== */
+
+/* 触发钮基类:行内弹性,文案左对齐 + 箭头右置;尺寸/布局由混入的变体类决定 */
+.zt-jsonview-dd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  outline: none;
+  cursor: pointer;
+}
+
+.zt-jsonview-dd:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.zt-jsonview-dd-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 空值文案(如「清空」项)渲染为淡色斜体 */
+.zt-jsonview-dd-label[data-empty='true'] {
+  color: var(--zt-muted, #5e7087);
+  font-style: italic;
+}
+
+.zt-jsonview-dd-caret {
+  display: inline-flex;
+  flex: none;
+  color: var(--zt-muted, #5e7087);
+  transition: transform 0.15s ease;
+}
+
+.zt-jsonview-dd[aria-expanded='true'] .zt-jsonview-dd-caret {
+  transform: rotate(180deg);
+}
+
+/* 下拉图标(触发钮/浮层选项通用:素色随文字色,固定尺寸不参与伸缩) */
+.zt-jsonview-dd-icon,
+.zt-jsonview-dd-opt-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--zt-muted, #5e7087);
+}
+
+.zt-jsonview-dd-icon svg,
+.zt-jsonview-dd-opt-icon svg {
+  display: block;
+}
+
+.zt-jsonview-dd-opt:hover .zt-jsonview-dd-opt-icon,
+.zt-jsonview-dd-opt[data-selected='true'] .zt-jsonview-dd-opt-icon {
+  color: inherit;
+}
+
+/* 标题行(单行:数据库名称 + 控制区) */
+.zt-jsonview-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 10px;
+  border-bottom: 1px solid var(--zt-border, #e6e6e6);
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+}
+
+.zt-jsonview-name {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 2px 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+.zt-jsonview-name:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  border-radius: 4px;
+}
+
+.zt-jsonview-name:focus {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 6%, transparent);
+  border-radius: 4px;
+}
+
+/* 标题行控制区:撤销/重做 + 视图下拉 + CSV 导入/导出 + 筛选排序 */
+.zt-jsonview-header-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.zt-jsonview-view-select {
+  max-width: 110px;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.zt-jsonview-view-select:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* 表格 */
+.zt-jsonview-table {
+  width: 100%;
+  /* fixed 布局:列宽按可用空间分配(行号 34 + 加列 36 固定,字段列均分),
+   * 窄容器下压缩列宽而不是溢出触发横向滚动条;内容超宽由格内省略/滚动兜底 */
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* 空态引导(无字段无记录,+ 按钮仍在表头) */
+.zt-jsonview-table-empty-guide {
+  padding: 10px 8px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12.5px;
+}
+
+/* 虚拟化占位行:只负责撑起窗口外的滚动高度,不画网格线(视觉与全量表一致) */
+.zt-jsonview-table .zt-jsonview-virtual-spacer td {
+  padding: 0;
+  border: none;
+}
+
+.zt-jsonview-table th,
+.zt-jsonview-table td {
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  /* 列分隔线:参照普通表格(GFM)的实线网格 */
+  border-right: 1px solid var(--zt-border, #e6e6e6);
+  padding: 0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* 表格最外圈不画线:与块容器(wrapper)边框重叠会显成 2px 粗线,
+ * 外圈统一交给容器边框,视觉一体 */
+.zt-jsonview-table th:last-child,
+.zt-jsonview-table td:last-child {
+  border-right: none;
+}
+
+/* 注意:这里不能写 `tr:last-child td { border-bottom: none }`——
+ * 「添加记录」行挂在 table 直下,最后一条数据行是 tbody 的 last-child,
+ * 会被误伤去掉底线,导致末行记录与添加行之间没有分隔横线。
+ * 表格真正的底边由 .zt-jsonview-add-record-row td 的 border-bottom: none 兜住。 */
+
+/* 列头 */
+.zt-jsonview-head-row th {
+  position: relative;
+  padding: 4px 6px;
+  /* 抬头行淡灰底:与数据库名称行(.zt-jsonview-header)同一 fg 4% 淡灰,观感一致 */
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zt-jsonview-corner-cell {
+  width: 34px;
+  min-width: 34px;
+}
+
+.zt-jsonview-field-head {
+  min-width: 120px;
+}
+
+.zt-jsonview-field-head[data-field-type='checkbox'] {
+  min-width: 72px;
+}
+
+/* 列头内容行:字段名占满剩余空间,「类型 + 删除」按钮组贴右缘 */
+.zt-jsonview-field-head-inner {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.zt-jsonview-field-name {
+  /* width:0 + flex:1:不参与列宽的固有尺寸计算,仅填充剩余空间(避免 input 默认宽度撑爆列) */
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  padding: 2px 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  outline: none;
+}
+
+.zt-jsonview-field-name:focus {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 6%, transparent);
+  border-radius: 4px;
+}
+
+/* 列头类型切换(自定义下拉触发钮,13px 大触达目标;默认渐隐,hover 列头浮现) */
+.zt-jsonview-field-type {
+  flex: none;
+  padding: 3px 7px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  outline: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.zt-jsonview-field-head:hover .zt-jsonview-field-type,
+.zt-jsonview-field-head.zt-jsonview-hover-sim .zt-jsonview-field-type {
+  opacity: 1;
+}
+
+/* 浮层展开时触发钮保持可见(移开鼠标不闪没) */
+.zt-jsonview-field-type[aria-expanded='true'] {
+  opacity: 1;
+}
+
+.zt-jsonview-field-type:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* 列头删除字段(垃圾桶):默认渐隐,hover 列头浮现 */
+.zt-jsonview-remove-field {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.zt-jsonview-field-head:hover .zt-jsonview-remove-field,
+.zt-jsonview-field-head.zt-jsonview-hover-sim .zt-jsonview-remove-field {
+  opacity: 1;
+}
+
+.zt-jsonview-remove-field:hover {
+  background: color-mix(in srgb, #d44c47 14%, transparent);
+  color: #d44c47;
+}
+
+.zt-jsonview-add-field-cell {
+  width: 36px;
+  min-width: 36px;
+}
+
+.zt-jsonview-add-field {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zt-jsonview-add-field:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* 数据行 */
+.zt-jsonview-record-row:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 3%, transparent);
+}
+
+.zt-jsonview-table .zt-jsonview-rownum-cell {
+  position: relative;
+  width: 34px;
+  min-width: 34px;
+  padding: 4px 6px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  /* 序号在行内水平+垂直居中;复合选择器压过基础 th/td 规则的 text-align:left */
+  text-align: center;
+  vertical-align: middle;
+}
+
+.zt-jsonview-remove-record {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  cursor: pointer;
+  opacity: 0;
+}
+
+.zt-jsonview-rownum-cell:hover .zt-jsonview-remove-record {
+  opacity: 1;
+}
+
+.zt-jsonview-rownum-cell:hover .zt-jsonview-remove-record:hover {
+  color: #d44c47;
+}
+
+/* 单元格:内边距全部交给输入控件,格子即输入框(块级控件铺满整格,无基线缝隙) */
+.zt-jsonview-cell {
+  min-width: 120px;
+  padding: 0;
+}
+
+.zt-jsonview-cell[data-field-type='checkbox'] {
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.zt-jsonview-cell[data-field-type='checkbox'] input[type='checkbox'] {
+  accent-color: var(--zt-primary, #2563eb);
+  cursor: pointer;
+}
+
+.zt-jsonview-static {
+  display: block;
+  min-height: 1.5em;
+  padding: 2px 6px;
+  word-break: break-word;
+}
+
+.zt-jsonview-cell[data-field-type='checkbox'] .zt-jsonview-static {
+  min-height: 0;
+}
+
+/* 单元格编辑控件:块级 + 高度铺满整格(hover/focus 底色即整格底色,无上下留缝);
+ * min-width:0 允许列宽压缩到格自身 min-width,避免 date 等输入的固有宽度把表格撑出横向滚动条 */
+.zt-jsonview-input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 30px;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+
+.zt-jsonview-input:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 3%, transparent);
+}
+
+.zt-jsonview-input:focus {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 8%, transparent);
+}
+
+/* 格内单选下拉触发钮(自定义下拉,块级 flex 铺满整格,箭头右置) */
+.zt-jsonview-input.zt-jsonview-dd {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.zt-jsonview-static a {
+  color: var(--zt-primary, #2563eb);
+  text-decoration: none;
+}
+
+.zt-jsonview-static a:hover {
+  text-decoration: underline;
+}
+
+/* 添加记录行 */
+.zt-jsonview-add-record-row td {
+  padding: 4px 6px;
+  border-bottom: none;
+}
+
+.zt-jsonview-add-record {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-add-record:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* 降级提示 */
+.zt-jsonview-invalid {
+  padding: 10px 12px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12.5px;
+}
+
+/* 只读态 */
+.zt-jsonview-wrapper[data-read-only='true'] .zt-jsonview-input,
+.zt-jsonview-wrapper[data-read-only='true'] .zt-jsonview-field-type {
+  cursor: default;
+}
+
+/* ===== 工具按钮(标题行控制区) ===== */
+.zt-jsonview-tool-btn {
+  min-width: 22px;
+  padding: 2px 5px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.zt-jsonview-tool-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+.zt-jsonview-tool-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.zt-jsonview-tool-btn-active {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 12%, transparent);
+  color: var(--zt-primary, #2563eb);
+}
+
+/* 展开态浮层选项列表(挂在块容器内;fixed 视口定位,不被 overflow 裁剪) */
+.zt-jsonview-dd-pop {
+  position: fixed;
+  z-index: 50;
+  box-sizing: border-box;
+  min-width: 160px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 5px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 16%);
+  animation: zt-jsonview-dd-pop-in 120ms ease-out;
+}
+
+@keyframes zt-jsonview-dd-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 选项钮(相邻项间隔 2px,避免 hover 底色粘连) */
+.zt-jsonview-dd-opt + .zt-jsonview-dd-opt {
+  margin-top: 2px;
+}
+
+.zt-jsonview-dd-opt {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 11px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--zt-fg, #1f2937);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zt-jsonview-dd-opt-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-jsonview-dd-opt[data-empty='true'] .zt-jsonview-dd-opt-label {
+  color: var(--zt-muted, #5e7087);
+  font-style: italic;
+}
+
+.zt-jsonview-dd-opt-check {
+  flex: none;
+  color: var(--zt-primary, #2563eb);
+  font-size: 12px;
+}
+
+.zt-jsonview-dd-opt:hover,
+.zt-jsonview-dd-opt[data-selected='true'] {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 12%, var(--zt-surface, #ffffff));
+}
+
+.zt-jsonview-dd-opt:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--zt-primary, #2563eb) 55%, transparent);
+  outline-offset: -2px;
+}
+
+/* 视图上下文选择行(看板分组字段/日历日期字段) */
+.zt-jsonview-context-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px;
+}
+
+.zt-jsonview-context-row:empty {
+  display: none;
+}
+
+.zt-jsonview-context-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11.5px;
+}
+
+.zt-jsonview-context-select {
+  max-width: 140px;
+  padding: 1px 4px;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 11.5px;
+  outline: none;
+  cursor: pointer;
+}
+
+.zt-jsonview-context-select:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* 筛选/排序弹出面板(锚定标题行下方) */
+.zt-jsonview-query-popover {
+  position: absolute;
+  top: 36px;
+  right: 10px;
+  z-index: 30;
+  width: 300px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 14%);
+}
+
+.zt-jsonview-query-section + .zt-jsonview-query-section {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+}
+
+.zt-jsonview-query-title {
+  margin-bottom: 6px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zt-jsonview-query-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+/* 面板行内下拉触发钮:淡底变体(与值输入同底),文案淡 muted */
+.zt-jsonview-query-field,
+.zt-jsonview-query-op {
+  min-width: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.zt-jsonview-query-field:hover,
+.zt-jsonview-query-op:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+.zt-jsonview-query-field {
+  flex: 1.2;
+}
+
+.zt-jsonview-query-op {
+  flex: 1;
+}
+
+.zt-jsonview-query-value {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+}
+
+.zt-jsonview-query-value:focus {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 8%, transparent);
+}
+
+.zt-jsonview-query-remove {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-query-remove:hover {
+  color: #d44c47;
+}
+
+.zt-jsonview-query-add {
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-query-add:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* TSV 粘贴确认条 */
+.zt-jsonview-tsv-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 8px;
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--zt-primary, #2563eb) 40%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 6%, var(--zt-surface, #ffffff));
+  font-size: 12px;
+}
+
+.zt-jsonview-tsv-label {
+  flex: 1;
+  color: var(--zt-fg, #1f2937);
+}
+
+.zt-jsonview-tsv-apply {
+  padding: 2px 10px;
+  border: none;
+  border-radius: 4px;
+  background: var(--zt-primary, #2563eb);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-tsv-apply:hover {
+  filter: brightness(1.08);
+}
+
+.zt-jsonview-tsv-cancel {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-tsv-cancel:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+}
+
+/* ===== 视图宿主与空态 ===== */
+.zt-jsonview-view-host {
+  /* 表格上下贴紧块边框(表格自身带边线,不另留内边距);左右由表格行内边距兜底 */
+  padding: 0;
+}
+
+.zt-jsonview-table-view {
+  padding: 0;
+}
+
+.zt-jsonview-view-notice {
+  padding: 14px 12px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12.5px;
+}
+
+/* ===== kanban 看板 ===== */
+.zt-jsonview-kanban {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 10px;
+  overflow-x: auto;
+}
+
+.zt-jsonview-kanban-column {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  width: 240px;
+  max-height: 420px;
+  border: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 70%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 2%, transparent);
+}
+
+.zt-jsonview-kanban-column-head {
+  padding: 6px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  color: var(--zt-muted, #5e7087);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.zt-jsonview-kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-height: 40px;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+/* 空列占位(「拖卡片到这里」) */
+.zt-jsonview-kanban-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  border: 1px dashed color-mix(in srgb, var(--zt-border, #e6e6e6) 80%, transparent);
+  border-radius: 6px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11.5px;
+  user-select: none;
+}
+
+.zt-jsonview-kanban-cards.zt-jsonview-kanban-dragover {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 8%, transparent);
+  outline: 1px dashed color-mix(in srgb, var(--zt-primary, #2563eb) 50%, transparent);
+  outline-offset: -2px;
+}
+
+/* 卡片内容容器:虚拟化时作为 VirtualList 锚点(卡片纵向排列与间距收敛于此) */
+.zt-jsonview-kanban-cards-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  width: 100%;
+}
+
+/* 虚拟占位块(撑起窗口外卡片空间;高度由视图按实测写入) */
+.zt-jsonview-kanban-virtual-spacer {
+  flex: none;
+  width: 100%;
+}
+
+.zt-jsonview-kanban-card {
+  padding: 6px 8px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 6px;
+  background: var(--zt-surface, #ffffff);
+  cursor: grab;
+}
+
+.zt-jsonview-kanban-card.zt-jsonview-kanban-dragging {
+  opacity: 0.45;
+}
+
+.zt-jsonview-kanban-card-title {
+  font-weight: 600;
+  font-size: 12.5px;
+  word-break: break-word;
+}
+
+.zt-jsonview-kanban-card-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.zt-jsonview-kanban-card-line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.zt-jsonview-kanban-card-line .zt-jsonview-static {
+  min-height: 0;
+  padding: 0;
+}
+
+.zt-jsonview-kanban-card-key {
+  flex: none;
+  color: var(--zt-muted, #5e7087);
+  font-size: 10.5px;
+}
+
+.zt-jsonview-kanban-add {
+  margin: 0 6px 6px;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zt-jsonview-kanban-add:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+/* ===== Gallery 画廊 ===== */
+/* 虚拟模式:grid 容器退化为块容器,每行一个行包装(行内列数随宽度自适应) */
+.zt-jsonview-gallery-grid-virtual {
+  display: block;
+}
+
+.zt-jsonview-gallery-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  /* 行间距收敛进包装内 padding:实测 offsetHeight 即行距完整高度,占位换算无偏差 */
+  padding-bottom: 10px;
+}
+
+.zt-jsonview-gallery-virtual-spacer {
+  width: 100%;
+}
+.zt-jsonview-gallery-view {
+  padding: 6px 10px;
+}
+
+.zt-jsonview-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+.zt-jsonview-gallery-card {
+  position: relative;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  overflow: hidden;
+}
+
+.zt-jsonview-gallery-card:not(.zt-jsonview-gallery-card-open) {
+  cursor: pointer;
+}
+
+.zt-jsonview-gallery-card:not(.zt-jsonview-gallery-card-open):hover {
+  border-color: color-mix(in srgb, var(--zt-primary, #2563eb) 50%, var(--zt-border, #e6e6e6));
+}
+
+.zt-jsonview-gallery-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 5%, transparent);
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+}
+
+.zt-jsonview-gallery-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zt-jsonview-gallery-image-broken::after {
+  content: '\2302';
+  font-size: 20px;
+  opacity: 0.4;
+}
+
+.zt-jsonview-gallery-card-title {
+  padding: 6px 8px;
+  font-weight: 600;
+  font-size: 12.5px;
+  word-break: break-word;
+}
+
+.zt-jsonview-gallery-card-title:empty::before {
+  color: var(--zt-muted, #5e7087);
+  font-weight: 400;
+  font-style: italic;
+  content: '\2014';
+}
+
+/* 展开编辑区(画廊/列表共用) */
+.zt-jsonview-gallery-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border-top: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+}
+
+.zt-jsonview-editor-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zt-jsonview-editor-label {
+  flex: none;
+  width: 72px;
+  overflow: hidden;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-jsonview-editor-line .zt-jsonview-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 展开编辑区下拉(自定义下拉触发钮):淡底变体 */
+.zt-jsonview-editor-line .zt-jsonview-dd {
+  padding: 2px 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 4%, transparent);
+  font-size: 12px;
+}
+
+.zt-jsonview-editor-line .zt-jsonview-dd:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+}
+
+.zt-jsonview-editor-collapse {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.zt-jsonview-editor-remove {
+  align-self: flex-end;
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #d44c47;
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.zt-jsonview-editor-remove:hover {
+  background: color-mix(in srgb, #d44c47 10%, transparent);
+}
+
+/* 画廊/列表添加按钮 */
+.zt-jsonview-view-add {
+  margin-top: 8px;
+  padding: 3px 10px;
+  border: 1px dashed var(--zt-border, #e6e6e6);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-view-add:hover {
+  border-color: var(--zt-primary, #2563eb);
+  color: var(--zt-primary, #2563eb);
+}
+
+/* ===== List 列表 ===== */
+.zt-jsonview-list-view {
+  padding: 4px 10px 8px;
+}
+
+.zt-jsonview-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.zt-jsonview-list-row {
+  position: relative;
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+}
+
+.zt-jsonview-list-row:not(.zt-jsonview-list-row-open) {
+  cursor: pointer;
+}
+
+.zt-jsonview-list-row:not(.zt-jsonview-list-row-open):hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 3%, transparent);
+}
+
+.zt-jsonview-list-row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+}
+
+.zt-jsonview-list-row-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.zt-jsonview-list-row-title:empty::before {
+  color: var(--zt-muted, #5e7087);
+  font-weight: 400;
+  font-style: italic;
+  content: '\2014';
+}
+
+.zt-jsonview-list-row-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  flex: none;
+  max-width: 180px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+.zt-jsonview-list-row-chip .zt-jsonview-static {
+  min-height: 0;
+  padding: 0;
+}
+
+/* ===== Calendar 日历 ===== */
+.zt-jsonview-calendar-view {
+  padding: 4px 10px 8px;
+}
+
+.zt-jsonview-calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+}
+
+.zt-jsonview-calendar-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.zt-jsonview-calendar-nav-btn {
+  padding: 2px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-jsonview-calendar-nav-btn:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+.zt-jsonview-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  border-left: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+}
+
+.zt-jsonview-calendar-weekday {
+  padding: 3px 6px;
+  border-right: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  text-align: center;
+}
+
+.zt-jsonview-calendar-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 64px;
+  padding: 2px 3px;
+  border-right: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e6e6e6) 60%, transparent);
+}
+
+.zt-jsonview-calendar-day-out {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 2%, transparent);
+}
+
+.zt-jsonview-calendar-day-out .zt-jsonview-calendar-day-num {
+  opacity: 0.4;
+}
+
+.zt-jsonview-calendar-day-today .zt-jsonview-calendar-day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--zt-primary, #2563eb);
+  color: #ffffff;
+  font-size: 10px;
+}
+
+.zt-jsonview-calendar-day-num {
+  padding: 1px 4px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+}
+
+.zt-jsonview-calendar-day.zt-jsonview-calendar-dragover {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 10%, transparent);
+  outline: 1px dashed color-mix(in srgb, var(--zt-primary, #2563eb) 50%, transparent);
+  outline-offset: -2px;
+}
+
+.zt-jsonview-calendar-chip {
+  position: relative;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 10%, transparent);
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+  word-break: break-word;
+  cursor: grab;
+}
+
+.zt-jsonview-calendar-chip .zt-jsonview-static {
+  min-height: 0;
+  padding: 0;
+}
+
+.zt-jsonview-calendar-chip-editor {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 170px;
+  padding: 6px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 6px;
+  background: var(--zt-surface, #ffffff);
+  box-shadow: 0 6px 18px rgb(15 23 42 / 14%);
+}
+
+.zt-jsonview-calendar-chip-editor .zt-jsonview-input {
+  min-width: 0;
+}
+
+/* 未排期条 */
+.zt-jsonview-calendar-unscheduled {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.zt-jsonview-calendar-unscheduled-label {
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+}
+
+.zt-jsonview-calendar-unscheduled .zt-jsonview-calendar-chip {
+  cursor: grab;
+}
+
+/* 轻提示 */
+.zt-jsonview-toast {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  z-index: 40;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 88%, transparent);
+  color: var(--zt-surface, #ffffff);
+  font-size: 12px;
+  transform: translateX(-50%);
+}
+
+/* 只读态补充 */
+.zt-jsonview-wrapper[data-read-only='true'] .zt-jsonview-kanban-card {
+  cursor: default;
+}
+
+.zt-jsonview-wrapper[data-read-only='true'] .zt-jsonview-calendar-chip {
+  cursor: default;
+}
+
+/* ===== Gantt 甘特图视图 ===== */
+.zt-jsonview-gantt-view {
+  overflow-x: auto;
+}
+
+.zt-jsonview-gantt-timeline {
+  position: relative;
+  min-width: max-content;
+}
+
+.zt-jsonview-gantt-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--zt-surface, #ffffff);
+  border-bottom: 1px solid var(--zt-border, #e5e5e5);
+}
+
+.zt-jsonview-gantt-months {
+  display: flex;
+}
+
+.zt-jsonview-gantt-month {
+  flex: none;
+  padding: 4px 8px;
+  border-right: 1px solid var(--zt-border, #e5e5e5);
+  color: var(--zt-muted, #5e7087);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.zt-jsonview-gantt-days {
+  display: flex;
+}
+
+.zt-jsonview-gantt-day {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zt-muted, #5e7087);
+  font-size: 10px;
+  border-right: 1px solid color-mix(in srgb, var(--zt-border, #e5e5e5) 50%, transparent);
+}
+
+.zt-jsonview-gantt-day-weekend {
+  background: color-mix(in srgb, var(--zt-border, #e5e5e5) 25%, transparent);
+}
+
+.zt-jsonview-gantt-day-today {
+  color: var(--zt-primary, #3b82f6);
+  font-weight: 700;
+}
+
+.zt-jsonview-gantt-body {
+  position: relative;
+}
+
+.zt-jsonview-gantt-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #e5e5e5) 60%, transparent);
+}
+
+.zt-jsonview-gantt-row:hover {
+  background: color-mix(in srgb, var(--zt-border, #e5e5e5) 22%, transparent);
+}
+
+.zt-jsonview-gantt-row-title {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  flex: none;
+  width: 160px;
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--zt-surface, #ffffff);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-jsonview-gantt-row-track {
+  position: relative;
+  flex: none;
+  height: 36px;
+}
+
+.zt-jsonview-gantt-bar {
+  position: absolute;
+  top: 50%;
+  height: 18px;
+  padding: 0 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--zt-primary, #3b82f6) 78%, transparent);
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.zt-jsonview-gantt-bar .zt-jsonview-static {
+  color: #ffffff;
+}
+
+.zt-jsonview-gantt-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  width: 2px;
+  margin-left: -1px;
+  background: color-mix(in srgb, var(--zt-danger, #ef4444) 70%, transparent);
+  pointer-events: none;
+}
+
+.zt-jsonview-gantt-editor {
+  padding: 8px 10px;
+  background: color-mix(in srgb, var(--zt-border, #e5e5e5) 18%, transparent);
+}
+
+/* ===== Text 文本视图:整库 JSON 代码编辑器(无工具栏,右键菜单承载操作) ===== */
+.zt-jsonview-text-view {
+  padding: 0;
+}
+
+/* 编辑器卡片:无边框无圆角无内距,四边紧贴块容器(边界由块自身提供) */
+.zt-jsonview-code-editor {
+  position: relative;
+  background: transparent;
+  overflow: hidden;
+}
+
+/* 非法态:无独立边框可变色,改用 inset 描边标红 */
+.zt-jsonview-code-editor[data-invalid='true'] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--zt-danger, #ef4444) 55%, transparent);
+}
+
+/* 右键菜单(视口定位,替代原头部格式化工具栏) */
+.zt-jsonview-code-menu {
+  position: fixed;
+  z-index: 60;
+  box-sizing: border-box;
+  min-width: 140px;
+  padding: 5px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 16%);
+  animation: zt-jsonview-dd-pop-in 120ms ease-out;
+}
+
+.zt-jsonview-code-menu-item {
+  display: flex;
+  box-sizing: border-box;
+  width: 100%;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--zt-fg, #1f2937);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zt-jsonview-code-menu-item:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 12%, var(--zt-surface, #ffffff));
+}
+
+.zt-jsonview-code-menu-item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.zt-jsonview-code-menu-danger {
+  color: #d44c47;
+}
+
+.zt-jsonview-code-menu-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, #d44c47 10%, transparent);
+}
+
+/* 高亮/输入叠层容器(JS 撑高;内部各自滚动) */
+.zt-jsonview-code-area {
+  position: relative;
+  overflow: hidden;
+}
+
+/* 高亮层与输入层共享同一排版:等宽字体、行高、内边距逐项对齐 */
+.zt-jsonview-code-highlight,
+.zt-jsonview-code-input {
+  margin: 0;
+  padding: 8px 12px;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+  font-size: 12.5px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+}
+
+/* 编辑态滚动统一由输入层驱动(JS 同步 scroll 到高亮层),高亮层自身不出滚动条 */
+.zt-jsonview-code-highlight {
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--zt-fg, #1f2937);
+  overflow: hidden;
+}
+
+/* 只读态无输入层:高亮层自身滚动并限高 */
+.zt-jsonview-code-editor[data-static='true'] .zt-jsonview-code-highlight {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.zt-jsonview-code-highlight code {
+  display: block;
+  min-width: max-content;
+  font: inherit;
+  background: transparent;
+}
+
+/* 输入层:覆盖高亮层,文字透明只留光标,选区高亮透出着色文本 */
+.zt-jsonview-code-input {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--zt-fg, #1f2937);
+  resize: none;
+  outline: none;
+}
+
+.zt-jsonview-code-input::selection {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 22%, transparent);
+  color: transparent;
+}
+
+/* JSON token 配色:类名与 prism 命名对齐,复用代码块同一套 --zt-* 色板 */
+.zt-jsonview-code-highlight .token.property,
+.zt-jsonview-code-highlight .token.tag {
+  color: color-mix(in srgb, var(--zt-primary, #2563eb) 82%, var(--zt-fg, #1f2937));
+}
+
+.zt-jsonview-code-highlight .token.string,
+.zt-jsonview-code-highlight .token.char,
+.zt-jsonview-code-highlight .token.attr-value {
+  color: color-mix(in srgb, var(--zt-secondary, #3b82f6) 80%, var(--zt-fg, #1f2937));
+}
+
+.zt-jsonview-code-highlight .token.number,
+.zt-jsonview-code-highlight .token.boolean,
+.zt-jsonview-code-highlight .token.constant,
+.zt-jsonview-code-highlight .token.symbol {
+  color: color-mix(in srgb, var(--zt-primary, #2563eb) 82%, var(--zt-fg, #1f2937));
+}
+
+.zt-jsonview-code-highlight .token.keyword,
+.zt-jsonview-code-highlight .token.null {
+  color: color-mix(in srgb, var(--zt-primary, #2563eb) 72%, var(--zt-secondary, #3b82f6));
+}
+
+.zt-jsonview-code-highlight .token.punctuation,
+.zt-jsonview-code-highlight .token.operator {
+  color: color-mix(in srgb, var(--zt-fg, #1f2937) 72%, var(--zt-muted, #5e7087));
+}

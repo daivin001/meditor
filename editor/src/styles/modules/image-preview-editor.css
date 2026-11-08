@@ -1,0 +1,289 @@
+/* styles/modules/image-preview-editor.css — 图片预览与标注编辑弹窗
+ *
+ * 灯箱式全屏弹层:遮罩 + 深色舞台(canvas)+ 底部工具栏。
+ * 弹窗宿主(.zt-md zt-md-dialog-host)已复制主题变量,激活色沿用 --zt-primary;
+ * 舞台/工具栏为灯箱视觉,固定深色,不随明暗主题切换。
+ */
+
+/* ===== 弹层骨架 ===== */
+
+.zt-md .zt-md-ipe-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: none;
+  flex-direction: column;
+  background: rgba(10, 12, 18, 0.82);
+  backdrop-filter: blur(6px);
+  /* 宿主 .zt-md-dialog-host 全局为 pointer-events:none(背景穿透模式,
+     见 image-upload-dialog.css),弹窗内容必须显式恢复可点,否则点击
+     会穿透到下层页面 —— 桌面壳里预览的关闭按钮正压在标题栏关闭按钮上,
+     穿透即触发关窗。 */
+  pointer-events: auto;
+}
+
+.zt-md .zt-md-ipe-overlay[data-open='true'] {
+  display: flex;
+}
+
+.zt-md .zt-md-ipe-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.zt-md .zt-md-ipe-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.zt-md .zt-md-ipe-hint {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+}
+
+/* ===== 舞台与画布 ===== */
+
+.zt-md .zt-md-ipe-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.zt-md .zt-md-ipe-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  user-select: none;
+}
+
+.zt-md .zt-md-ipe-canvas[data-panning='true'] {
+  cursor: grabbing !important;
+}
+
+/* 加载/错误态遮罩(data-state 驱动)。 */
+.zt-md .zt-md-ipe-loading,
+.zt-md .zt-md-ipe-load-error {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.zt-md .zt-md-ipe-overlay[data-state='loading'] .zt-md-ipe-loading {
+  display: flex;
+}
+
+.zt-md .zt-md-ipe-overlay[data-state='error'] .zt-md-ipe-load-error {
+  display: flex;
+}
+
+.zt-md .zt-md-ipe-spinner {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  animation: zt-md-ipe-spinner-rotate 0.9s linear infinite;
+}
+
+@keyframes zt-md-ipe-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== 底部工具栏 ===== */
+
+.zt-md .zt-md-ipe-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.875rem;
+  background: rgba(15, 18, 26, 0.94);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zt-md .zt-md-ipe-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.zt-md .zt-md-ipe-separator {
+  width: 1px;
+  height: 1.25rem;
+  margin: 0 0.375rem;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* 图标按钮。 */
+.zt-md .zt-md-ipe-button {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.zt-md .zt-md-ipe-button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.zt-md .zt-md-ipe-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zt-md .zt-md-ipe-button[data-active='true'] {
+  background: var(--zt-primary, #4b7bec);
+  color: var(--zt-primary-foreground, #ffffff);
+}
+
+.zt-md .zt-md-ipe-button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 缩放百分比标签(点击回到 100%)。 */
+.zt-md .zt-md-ipe-zoom-label {
+  min-width: 3.25rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.zt-md .zt-md-ipe-zoom-label:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.zt-md .zt-md-ipe-zoom-label:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* 颜色色板。 */
+.zt-md .zt-md-ipe-swatch {
+  position: relative;
+  display: inline-flex;
+  width: 1.25rem;
+  height: 1.25rem;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 1px;
+  cursor: pointer;
+}
+
+.zt-md .zt-md-ipe-swatch[data-active='true'] {
+  outline: 2px solid #ffffff;
+}
+
+.zt-md .zt-md-ipe-swatch-custom {
+  background: conic-gradient(#f43f5e, #f59e0b, #22c55e, #3b82f6, #a855f7, #f43f5e);
+}
+
+.zt-md .zt-md-ipe-swatch-custom input[type='color'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+/* 笔宽按钮(圆点直径区分档位)。 */
+.zt-md .zt-md-ipe-stroke-dot {
+  display: inline-block;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* 文本按钮(取消/应用)。 */
+.zt-md .zt-md-ipe-text-button {
+  height: 2rem;
+  padding: 0 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.zt-md .zt-md-ipe-text-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.zt-md .zt-md-ipe-confirm {
+  border-color: transparent;
+  background: var(--zt-primary, #4b7bec);
+  color: var(--zt-primary-foreground, #ffffff);
+  font-weight: 600;
+}
+
+.zt-md .zt-md-ipe-confirm:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--zt-primary, #4b7bec) 85%, #ffffff);
+  color: var(--zt-primary-foreground, #ffffff);
+}
+
+.zt-md .zt-md-ipe-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== 状态可见性 ===== */
+
+/* 裁切模式:仅裁切确认/取消可点,其余编辑工具禁用。 */
+.zt-md .zt-md-ipe-overlay[data-crop='true'] .zt-md-ipe-toolbar .zt-md-ipe-hide-in-crop {
+  display: none;
+}
+
+/* 裁切确认/取消默认隐藏,进入裁切模式显示。 */
+.zt-md .zt-md-ipe-crop-only {
+  display: none;
+}
+
+.zt-md .zt-md-ipe-overlay[data-crop='true'] .zt-md-ipe-crop-only {
+  display: inline-flex;
+}
+
+/* 只读态(或跨域锁定)隐藏全部编辑分组,仅保留查看。 */
+.zt-md .zt-md-ipe-overlay[data-editable='false'] .zt-md-ipe-edit-only {
+  display: none !important;
+}

@@ -1,0 +1,275 @@
+/**
+ * toolbar.css — 顶部工具栏样式(语雀风格)
+ *
+ * 文档流元素(挂 .meditor-toolbar-host),底色与编辑器一致,
+ * 左侧绿色圆钮 + 分组分隔线 + 按钮悬浮底色 + 块转换下拉面板。
+ */
+
+/* 工具栏根(默认靠左;toolbar.align 可切居中/靠右) */
+.zt-md-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1px;
+  padding: 4px 8px;
+  /* 与块面统一浅灰家族(原 --zt-bg #f5f5f5 偏深;--zt-elevated = fg 4% 混白) */
+  background: var(--zt-elevated);
+  border-bottom: 1px solid var(--zt-border);
+  position: relative;
+  font-family: var(--zt-font);
+}
+
+/* 对齐方式:配置 toolbar.align 生效(缺省靠左) */
+.zt-md-toolbar[data-align='center'] {
+  justify-content: center;
+}
+
+.zt-md-toolbar[data-align='right'] {
+  justify-content: flex-end;
+}
+
+/* 分组分隔线 */
+.zt-md-toolbar-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 5px;
+  background: var(--zt-border);
+  flex-shrink: 0;
+}
+
+/* 响应式收起态:宽度不足时由布局脚本按优先级隐藏低频按钮,保证工具栏单行。
+   后代选择器保证优先级高于各按钮自身的 display 声明。 */
+.zt-md-toolbar .zt-md-toolbar-collapsed {
+  display: none;
+}
+
+/* 普通按钮 */
+.zt-md-toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--zt-fg);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.zt-md-toolbar-button:hover {
+  background: var(--zt-bg-hover);
+}
+
+/* 选中态:中性淡纯灰底,图标不染色(保持默认前景色,按设计反馈不再用主蓝) */
+.zt-md-toolbar-button[data-active='true'] {
+  background: var(--zt-bg-active);
+}
+
+.zt-md-toolbar-button[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zt-md-toolbar-button[disabled]:hover {
+  background: transparent;
+}
+
+/* 禁用态对齐:块转换触发钮与工具栏内链接触发钮不复用 .zt-md-toolbar-button
+   类,disabled 置灰需单独覆盖 —— 源码/翻译模式下全按钮禁用时视觉一致。 */
+.zt-md-toolbar-block-trigger[disabled],
+.zt-md-toolbar .zt-md-selection-tooltip-button[disabled] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.zt-md-toolbar-block-trigger[disabled]:hover,
+.zt-md-toolbar .zt-md-selection-tooltip-button[disabled]:hover {
+  background: transparent;
+}
+
+/* 焦点态:不画浏览器默认焦点环。点击展开时脚本聚焦触发钮,Chromium 的
+   :focus-visible 启发式(前焦点为文本编辑区则连带匹配)会让黑/蓝双环
+   在鼠标操作后也出现;激活与键盘位置反馈已由 data-active /
+   aria-expanded / data-keyboard-active 底色承担,无需再叠框。 */
+.zt-md-toolbar-button:focus,
+.zt-md-toolbar-button:focus-visible,
+.zt-md-toolbar-block-trigger:focus,
+.zt-md-toolbar-block-trigger:focus-visible,
+.zt-md-toolbar-dropdown-item:focus,
+.zt-md-toolbar-dropdown-item:focus-visible {
+  outline: none;
+}
+
+/* 翻译请求进行中:按钮图标旋转示意加载 */
+.zt-md-toolbar-button[data-loading='true'] .zt-md-toolbar-button-icon svg {
+  animation: zt-md-toolbar-spin 1s linear infinite;
+}
+
+@keyframes zt-md-toolbar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.zt-md-toolbar-button-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 插入菜单按钮(普通加号,与其它按钮同款) */
+.zt-md-toolbar-button[data-command='blockMenu'] {
+  margin-right: 4px;
+}
+
+/* 链接按钮(复用选区工具栏控件,样式对齐工具栏按钮) */
+.zt-md-toolbar .zt-md-selection-tooltip-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  color: var(--zt-fg);
+}
+
+/* 链接按钮宿主(包裹 LinkControl 的 span,等同直接按钮参与 flex 布局,避免图标不居中) */
+.zt-md-toolbar-link-host {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 块转换触发钮(正文 ▾) */
+.zt-md-toolbar-block-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 92px;
+  height: 28px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--zt-fg);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--zt-font);
+  flex-shrink: 0;
+}
+
+.zt-md-toolbar-block-trigger:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-toolbar-block-trigger[aria-expanded='true'] {
+  background: var(--zt-bg-active);
+}
+
+.zt-md-toolbar-block-trigger-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-md-toolbar-block-trigger-chevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--zt-muted);
+}
+
+/* 块转换下拉面板(视觉对齐 slash 命令菜单) */
+.zt-md-toolbar-dropdown {
+  position: absolute;
+  top: 100%;
+  z-index: 1005;
+  width: 224px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 8px;
+  background: var(--zt-surface);
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  box-shadow: var(--zt-shadow);
+  /* 打开动画:120ms 淡入(保持 display 切换,对齐 selection-menu.css) */
+  animation: zt-md-toolbar-dropdown-in 120ms ease;
+}
+
+@keyframes zt-md-toolbar-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.zt-md-toolbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-fg);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--zt-font);
+  text-align: left;
+}
+
+/* 相邻项之间留间隔,避免与 slash 菜单视觉不一致 */
+.zt-md-toolbar-dropdown-item + .zt-md-toolbar-dropdown-item {
+  margin-top: 4px;
+}
+
+.zt-md-toolbar-dropdown-item:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-toolbar-dropdown-item[data-active='true'] {
+  background: var(--zt-bg-active);
+}
+
+/* 键盘导航高亮(aria-selected 同步;仅底色与 hover 同强度,不描边) */
+.zt-md-toolbar-dropdown-item[data-keyboard-active='true'] {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-toolbar-dropdown-item-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.zt-md-toolbar-dropdown-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-md-toolbar-dropdown-item-shortcut {
+  font-family: var(--zt-font-mono);
+  font-size: 11px;
+  color: var(--zt-muted);
+}
+
+/* 工具栏宿主(文档流容器) */
+.meditor-toolbar-host {
+  flex-shrink: 0;
+}

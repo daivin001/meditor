@@ -1,0 +1,73 @@
+/* styles/modules/inline-color.css — 行内文字颜色/高亮
+ *
+ * - 选区工具栏色板弹层(zt-md-selection-color-popover)
+ * - 编辑器内高亮背景圆角(data-highlight)
+ */
+
+/* 编辑器内高亮 mark 视觉(背景色由行内 style 提供) */
+.zt-md-editor span[data-highlight] {
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* 色板弹层 */
+.zt-md-selection-color-popover {
+  box-sizing: border-box;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  padding: 8px;
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, black 32%, transparent);
+  transform-origin: top center;
+}
+
+/* 色块网格 3×3 */
+.zt-md-selection-color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.zt-md-selection-color-swatch {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 70%, transparent);
+  border-radius: var(--zt-radius);
+  background: var(--zt-swatch-color);
+  cursor: pointer;
+}
+
+/* 激活色块:内圈对勾式描边 */
+.zt-md-selection-color-swatch[data-active='true'] {
+  outline: 2px solid var(--zt-primary);
+  outline-offset: 1px;
+}
+
+.zt-md-selection-color-swatch:hover {
+  border-color: var(--zt-fg);
+}
+
+/* 恢复默认 */
+.zt-md-selection-color-reset {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 4px 6px;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.zt-md-selection-color-reset:hover {
+  background: color-mix(in srgb, var(--zt-fg) 8%, transparent);
+  color: var(--zt-fg);
+}

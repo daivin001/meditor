@@ -1,0 +1,79 @@
+/* styles/modules/callout.css — 标注块(Callout,GitHub Alerts 语法)
+ *
+ * - kind 决定左侧条与底色(note 蓝/tip 绿/important 紫/warning 黄/caution 红);
+ * - 头部行不可编辑(kind 按钮 + 可选标题),内容区为 PM contentDOM。
+ */
+
+.zt-md-editor .zt-md-callout {
+  position: relative;
+  margin-block: 0.75rem;
+  border-left: 3px solid var(--zt-callout-color, var(--zt-primary));
+  border-radius: var(--zt-radius);
+  padding: 0.65rem 0.9rem;
+  background: color-mix(in srgb, var(--zt-callout-color, var(--zt-primary)) 7%, transparent);
+}
+
+.zt-md-editor .zt-md-callout[data-kind='note'] {
+  --zt-callout-color: #337ea9;
+}
+
+.zt-md-editor .zt-md-callout[data-kind='tip'] {
+  --zt-callout-color: #448361;
+}
+
+.zt-md-editor .zt-md-callout[data-kind='important'] {
+  --zt-callout-color: #9065b0;
+}
+
+.zt-md-editor .zt-md-callout[data-kind='warning'] {
+  --zt-callout-color: #cb912f;
+}
+
+.zt-md-editor .zt-md-callout[data-kind='caution'] {
+  --zt-callout-color: #d44c47;
+}
+
+/* 头部行(kind 按钮 + 可选标题) */
+.zt-md-editor .zt-md-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.15rem;
+}
+
+.zt-md-editor .zt-md-callout-kind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-callout-color, var(--zt-primary));
+  cursor: pointer;
+}
+
+.zt-md-editor .zt-md-callout-kind:hover {
+  background: color-mix(in srgb, var(--zt-callout-color, var(--zt-primary)) 14%, transparent);
+}
+
+.zt-md-editor .zt-md-callout[data-editable='false'] .zt-md-callout-kind {
+  cursor: default;
+}
+
+/* 可选标题 */
+.zt-md-editor .zt-md-callout-title {
+  font-weight: 600;
+  color: var(--zt-callout-color, var(--zt-primary));
+}
+
+/* 内容区 */
+.zt-md-editor .zt-md-callout-content > :first-child {
+  margin-top: 0;
+}
+
+.zt-md-editor .zt-md-callout-content > :last-child {
+  margin-bottom: 0;
+}

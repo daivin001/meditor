@@ -1,0 +1,243 @@
+/* modules/ai.css — AI 助手(底部会话框 + 流式生成占位块) */
+
+/* ===== 底部会话框宿主(编辑区下方文档流槽;data-open 驱动展开态) ===== */
+
+.meditor-ai-panel-host {
+  flex-shrink: 0;
+  display: none;
+}
+
+.meditor-ai-panel-host[data-open='true'] {
+  display: block;
+}
+
+/* ===== 会话框(DeepSeek 风格:上输入/下控制行) ===== */
+
+.zt-md .zt-md-ai-panel {
+  position: relative;
+  margin: 8px 12px 12px;
+  padding: 10px 12px 8px;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  box-shadow: 0 2px 10px -6px color-mix(in srgb, black 18%, transparent);
+}
+
+.zt-md .zt-md-ai-input {
+  display: block;
+  width: 100%;
+  max-height: 140px;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--zt-fg);
+  font: inherit;
+  font-size: 0.95em;
+  line-height: 1.6;
+  padding: 2px 4px;
+  box-sizing: border-box;
+}
+
+.zt-md .zt-md-ai-input::placeholder {
+  color: var(--zt-muted);
+  opacity: 0.7;
+}
+
+.zt-md .zt-md-ai-input:disabled {
+  opacity: 0.6;
+}
+
+.zt-md .zt-md-ai-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 模型选择 chip(左)。 */
+.zt-md .zt-md-ai-model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 200px;
+  padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--zt-primary) 45%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--zt-primary) 8%, transparent);
+  color: var(--zt-primary);
+  font: inherit;
+  font-size: 0.85em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.zt-md .zt-md-ai-model-chip:disabled {
+  cursor: default;
+  opacity: 0.6;
+  border-color: var(--zt-border);
+  background: transparent;
+  color: var(--zt-muted);
+}
+
+.zt-md .zt-md-ai-model-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zt-md .zt-md-ai-model-chevron {
+  flex-shrink: 0;
+}
+
+/* 模型下拉清单(chip 正上方弹出)。 */
+.zt-md .zt-md-ai-model-menu {
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 12px;
+  z-index: 40;
+  min-width: 220px;
+  max-width: min(360px, calc(100% - 24px));
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 4px;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  box-shadow: var(--zt-shadow);
+}
+
+.zt-md .zt-md-ai-model-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.zt-md .zt-md-ai-model-item:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md .zt-md-ai-model-item[data-active='true'] {
+  background: var(--zt-bg-active);
+  color: var(--zt-primary);
+}
+
+.zt-md .zt-md-ai-model-item-name {
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.zt-md .zt-md-ai-model-item-id {
+  font-size: 0.78em;
+  color: var(--zt-muted);
+  font-family: var(--zt-font-mono);
+}
+
+/* 状态/错误文案(中,占剩余空间)。 */
+.zt-md .zt-md-ai-status {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82em;
+  color: var(--zt-muted);
+}
+
+.zt-md .zt-md-ai-status[data-kind='error'] {
+  color: var(--zt-destructive);
+}
+
+/* 右侧按钮组。 */
+.zt-md .zt-md-ai-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 发送/停止圆钮(主色)。 */
+.zt-md .zt-md-ai-send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--zt-primary);
+  color: var(--zt-primary-foreground);
+  cursor: pointer;
+}
+
+.zt-md .zt-md-ai-send:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.zt-md .zt-md-ai-send:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.zt-md .zt-md-ai-panel[data-generating='true'] .zt-md-ai-send {
+  background: var(--zt-destructive);
+  color: var(--zt-destructive-foreground);
+}
+
+/* ===== 流式生成占位块(文档内) ===== */
+
+.zt-md .zt-md-ai-stream {
+  margin: 8px 0;
+  padding: 10px 14px 12px;
+  border: 1px dashed color-mix(in srgb, var(--zt-primary) 45%, transparent);
+  border-radius: var(--zt-radius-lg);
+  background: color-mix(in srgb, var(--zt-primary) 4%, var(--zt-surface));
+}
+
+.zt-md .zt-md-ai-stream-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  color: var(--zt-primary);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.zt-md .zt-md-ai-stream-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--zt-primary);
+  animation: zt-md-ai-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes zt-md-ai-pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.zt-md .zt-md-ai-stream-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--zt-fg);
+  font-size: 0.95em;
+  line-height: 1.7;
+}

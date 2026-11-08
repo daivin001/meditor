@@ -1,0 +1,44 @@
+/* modules/footnote.css — 脚注(引用标记 + 定义块) */
+
+/* 引用标记:上标小号,带浅色胶囊便于点击 */
+.zt-md sup.zt-md-footnote-ref {
+  display: inline-block;
+  font-size: 0.72em;
+  line-height: 1;
+  padding: 1px 5px;
+  margin: 0 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+
+.zt-md sup.zt-md-footnote-ref:hover {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+/* 定义块:文档末尾脚注区,左侧细线 + 淡化标签 */
+.zt-md div.zt-md-footnote-definition {
+  position: relative;
+  margin: 6px 0;
+  padding: 4px 0 4px 12px;
+  border-left: 2px solid color-mix(in srgb, currentColor 18%, transparent);
+  font-size: 0.88em;
+}
+
+.zt-md div.zt-md-footnote-definition::before {
+  content: '[^' attr(data-footnote-label) ']:';
+  position: absolute;
+  left: -2px;
+  top: 4px;
+  transform: translateX(-100%);
+  padding-right: 6px;
+  opacity: 0.55;
+  font-family: var(--zt-font-mono);
+  white-space: nowrap;
+}
+
+/* 定义块内段落不额外占距 */
+.zt-md div.zt-md-footnote-definition > p {
+  margin: 2px 0;
+}

@@ -1,0 +1,21 @@
+/* modules/writing-mode.css — 专注模式 / 打字机模式 */
+
+/* 专注模式:data-focus-mode=on 时,非当前顶层块(无 zt-md-focus-current 标记)
+ * 降不透明度;悬停临时恢复,便于扫视定位。 */
+.zt-md[data-focus-mode='on'] .zt-md-editor .ProseMirror > *:not(.zt-md-focus-current) {
+  opacity: 0.28;
+  transition: opacity 0.18s ease;
+}
+
+.zt-md[data-focus-mode='on'] .zt-md-editor .ProseMirror > *:not(.zt-md-focus-current):hover {
+  opacity: 0.72;
+}
+
+.zt-md[data-focus-mode='on'] .zt-md-editor .ProseMirror > .zt-md-focus-current {
+  transition: opacity 0.18s ease;
+}
+
+/* 打字机模式:滚动由插件驱动,无独立视觉样式;占位选择器保留调试钩子。 */
+.zt-md[data-typewriter-mode='on'] .zt-md-editor {
+  scroll-behavior: auto;
+}

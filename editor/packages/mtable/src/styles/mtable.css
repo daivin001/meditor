@@ -1,0 +1,399 @@
+/**
+ * mtable.css — CSV 表格编辑器样式
+ *
+ * 视觉常量对齐 Univer Sheets(见 theme.ts 注释中的规格来源)。
+ * 动态定位(编辑框 left/top/width/height、display)由 JS 内联控制。
+ */
+
+.mtable-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #FFFFFF;
+  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+}
+
+.mtable-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  cursor: cell;
+  /* 触摸交互全部由组件自管(平移/点按/长按),禁用浏览器原生手势 */
+  touch-action: none;
+}
+
+/* 单元格编辑浮层 */
+.mtable-editor {
+  position: absolute;
+  display: none;
+  box-sizing: border-box;
+  border: 2px solid #2C53F1;
+  border-radius: 0;
+  padding: 0 4px;
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-size: 13px;
+  color: #1B1C1F;
+  background: #FFFFFF;
+  outline: none;
+  z-index: 10;
+}
+
+/* 右键菜单 */
+.mtable-context-menu {
+  position: fixed;
+  display: none;
+  z-index: 10000;
+  min-width: 132px;
+  padding: 4px;
+  background: #FFFFFF;
+  border: 1px solid #E4E4E4;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-size: 13px;
+  user-select: none;
+}
+
+.mtable-context-menu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #1B1C1F;
+  line-height: 1.4;
+}
+
+.mtable-context-menu-item:hover:not([data-disabled="true"]) {
+  background: #F5F5F5;
+}
+
+.mtable-context-menu-item[data-disabled="true"] {
+  color: #ACACAC;
+  cursor: default;
+}
+
+/* --- 左上角全屏按钮(行头列 × 列头行交叉的小方块):默认透明,悬停显现 --- */
+.mtable-expand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 46px;
+  height: 20px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  color: transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mtable-expand:hover {
+  color: #5F646E;
+  background: #E8E8E8;
+}
+
+.mtable-expand:active {
+  color: #1B1C1F;
+}
+
+.mtable-expand:focus-visible {
+  outline: 2px solid #2C53F1;
+  outline-offset: -2px;
+}
+
+/* --- 全屏弹窗(最大化查看/编辑表格) --- */
+.mtable-dialog-host {
+  position: fixed;
+  inset: 0;
+}
+
+.mtable-fullscreen-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(27, 28, 31, 0.62);
+}
+
+.mtable-fullscreen-window {
+  box-sizing: border-box;
+  display: flex;
+  width: calc(100vw - 24px);
+  height: calc(100vh - 24px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #E4E4E4;
+  border-radius: 8px;
+  background: #FFFFFF;
+  box-shadow: 0 18px 42px rgba(27, 28, 31, 0.22);
+}
+
+.mtable-fullscreen-window *,
+.mtable-fullscreen-window *::before,
+.mtable-fullscreen-window *::after {
+  box-sizing: border-box;
+}
+
+.mtable-fullscreen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid #E4E4E4;
+}
+
+.mtable-fullscreen-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1B1C1F;
+}
+
+.mtable-fullscreen-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  color: #5F646E;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mtable-fullscreen-close:hover {
+  color: #1B1C1F;
+  background: rgba(27, 28, 31, 0.1);
+}
+
+.mtable-fullscreen-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 8px;
+  position: relative;
+}
+
+/* --- 筛选面板浮层(参照 Univer SheetsFilterPanel:重置 + 筛选/排序双 tab) --- */
+
+.mtable-filter-panel {
+  position: fixed;
+  z-index: 10001;
+  width: 260px;
+  max-height: 420px;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: #FFFFFF;
+  border: 1px solid #E4E4E4;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  font-family: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+  font-size: 13px;
+  color: #1B1C1F;
+  user-select: none;
+}
+
+/* 双 tab(筛选 / 排序) */
+.mtable-filter-tabs {
+  display: flex;
+  border-bottom: 1px solid #E4E4E4;
+  margin-bottom: 8px;
+}
+
+.mtable-filter-tab {
+  flex: 1;
+  border: 0;
+  background: none;
+  padding: 6px 0;
+  font: inherit;
+  color: #5F646E;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.mtable-filter-tab[data-active="true"] {
+  color: #2C53F1;
+  border-bottom-color: #2C53F1;
+  font-weight: 500;
+}
+
+/* 面板主体(搜索框 + 列表 / 排序菜单项) */
+.mtable-filter-panel-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mtable-filter-search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid #E4E4E4;
+  border-radius: 4px;
+  font: inherit;
+  color: #1B1C1F;
+  outline: none;
+  margin-bottom: 8px;
+}
+
+.mtable-filter-search:focus {
+  border-color: #2C53F1;
+}
+
+.mtable-filter-list {
+  overflow-y: auto;
+  min-height: 120px;
+  max-height: 240px;
+  border: 1px solid #EEEEEE;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.mtable-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.mtable-filter-item:hover {
+  background: #F5F5F5;
+}
+
+.mtable-filter-item input[type="checkbox"] {
+  margin: 0;
+  accent-color: #2C53F1;
+  flex-shrink: 0;
+}
+
+.mtable-filter-item-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtable-filter-item-count {
+  color: #ACACAC;
+  flex-shrink: 0;
+}
+
+/* "仅筛选"链接(同 Univer:行 hover 时显现,点击只勾选该值) */
+.mtable-filter-item-only {
+  display: none;
+  padding: 0 2px;
+  font-size: 12px;
+  color: #2C53F1;
+  cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.mtable-filter-item:hover .mtable-filter-item-only {
+  display: inline-block;
+}
+
+/* 排序 tab 的菜单项 */
+.mtable-filter-sort-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #1B1C1F;
+}
+
+.mtable-filter-sort-item:hover {
+  background: #F5F5F5;
+}
+
+.mtable-filter-sort-item[data-active="true"] {
+  color: #2C53F1;
+  font-weight: 500;
+}
+
+.mtable-filter-sort-item[data-active="true"] > svg:first-child {
+  color: #2C53F1;
+}
+
+.mtable-filter-sort-check {
+  margin-left: auto;
+  color: #2C53F1;
+  flex-shrink: 0;
+}
+
+.mtable-filter-sort-item svg {
+  color: #5F646E;
+  flex-shrink: 0;
+}
+
+/* 底部按钮行(左:重置;右:取消 / 确认) */
+.mtable-filter-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.mtable-filter-footer-right {
+  display: flex;
+  gap: 8px;
+}
+
+.mtable-filter-btn {
+  border: 1px solid #E4E4E4;
+  background: #FFFFFF;
+  border-radius: 4px;
+  padding: 4px 14px;
+  font: inherit;
+  color: #1B1C1F;
+  cursor: pointer;
+}
+
+.mtable-filter-btn:hover {
+  background: #F5F5F5;
+}
+
+/* 重置(链接样式,左下角;纯文字略内收避免贴边) */
+.mtable-filter-btn-link {
+  border: 0;
+  background: none;
+  padding: 4px 0;
+  margin-left: 8px;
+  color: #2C53F1;
+}
+
+.mtable-filter-btn-link:hover {
+  background: none;
+  text-decoration: underline;
+}
+
+.mtable-filter-btn-primary {
+  background: #2C53F1;
+  border-color: #2C53F1;
+  color: #FFFFFF;
+}
+
+.mtable-filter-btn-primary:hover {
+  background: #2447D6;
+}
+
+.mtable-filter-btn-primary:disabled {
+  background: #ACACAC;
+  border-color: #ACACAC;
+  cursor: default;
+}

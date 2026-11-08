@@ -1,0 +1,194 @@
+/* styles/modules/table.css — 表格(主体/聚焦操作栏/更多菜单)
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/table.css
+ */
+
+.zt-md-editor .ProseMirror .tableWrapper {
+  margin: 0.75rem 0 1rem;
+  overflow-x: auto;
+}
+
+/* 注意:以下表格样式只应作用于编辑器自身的 GFM 表格。
+ * jsondata(JSON 数据)等 NodeView 块内部也有 table/th/td,
+ * 用 :not() 排除,避免块内表格被编辑器表格的边框/内距/margin 撑出缝隙。 */
+.zt-md-editor .ProseMirror table:not(.zt-jsonview-table) {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 12px 0px;
+}
+
+.zt-md-editor .ProseMirror th:not([class*='zt-jsonview']),
+.zt-md-editor .ProseMirror td:not([class*='zt-jsonview']) {
+  border: 1px solid var(--zt-border);
+  padding: 0.5rem 0.625rem;
+  vertical-align: top;
+}
+
+.zt-md-editor .ProseMirror th:not([class*='zt-jsonview']) {
+  /* 统一走 --zt-elevated(= fg 4% 混白,与 jsondata 表头同观感) */
+  background: var(--zt-elevated);
+  font-weight: 600;
+  text-align: left;
+}
+
+.zt-md-table-actions-overlay {
+  position: absolute;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  pointer-events: auto;
+}
+
+.zt-md-table-more-actions-mount {
+  display: inline-flex;
+  align-items: center;
+}
+
+.zt-md-table-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.zt-md-table-action-button:hover {
+  background: var(--zt-bg-hover);
+  color: var(--zt-primary);
+  transform: none;
+}
+
+.zt-md-table-action-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.zt-md-table-action-button-active {
+  background: var(--zt-bg-active);
+  color: var(--zt-primary);
+}
+
+.zt-md-table-action-button-danger:hover {
+  background: color-mix(in srgb, var(--zt-destructive) 10%, transparent);
+  color: var(--zt-destructive);
+}
+
+.zt-md-table-action-button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.zt-md-table-action-popover {
+  width: 10.5rem;
+  padding: 8px;
+  pointer-events: auto;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  box-shadow: var(--zt-shadow);
+  transform-origin: top right;
+  animation: zt-md-table-action-popover-in 120ms ease-out;
+}
+
+@keyframes zt-md-table-action-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.zt-md-table-action-menu-group {
+  display: grid;
+  gap: 4px;
+}
+
+.zt-md-table-action-menu-divider {
+  height: 1px;
+  margin: 4px 6px;
+  background: color-mix(in srgb, var(--zt-border) 74%, transparent);
+}
+
+button.zt-md-table-action-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  justify-content: flex-start;
+  /* 覆盖 UA 对 button 的 text-align:center,防止 flex:1 的文案在剩余宽度内居中、远离图标 */
+  text-align: left;
+  border: none;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-fg);
+  font-size: 14px;
+  font-family: var(--zt-font);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.zt-md-table-action-popover button.zt-md-table-action-menu-item:not(:disabled):hover {
+  background: var(--zt-bg-hover);
+  color: var(--zt-fg);
+}
+
+.zt-md-table-action-popover button.zt-md-table-action-menu-item:disabled {
+  opacity: 0.62;
+  color: var(--zt-fg);
+  cursor: not-allowed;
+}
+
+.zt-md-table-action-menu-item-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  color: var(--zt-muted);
+}
+
+.zt-md-table-action-menu-item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.zt-md-table-action-menu-item-label {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.zt-md-table-action-popover button.zt-md-table-action-menu-item-danger .zt-md-table-action-menu-item-icon {
+  color: var(--zt-destructive);
+}
+
+button.zt-md-table-action-menu-item-danger {
+  color: var(--zt-destructive);
+}
+
+.zt-md-table-action-popover button.zt-md-table-action-menu-item-danger:disabled {
+  color: var(--zt-destructive);
+}
+
+.zt-md-table-action-popover button.zt-md-table-action-menu-item-danger:not(:disabled):hover {
+  background: color-mix(in srgb, var(--zt-destructive) 8%, var(--zt-surface));
+  color: var(--zt-destructive);
+}

@@ -1,0 +1,83 @@
+/* styles/modules/math-inline.css — 行内公式
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/math-inline.css
+ * (原版 Tailwind @apply 已翻译为等价纯 CSS)
+ */
+
+.zt-md-editor .zt-md-math-inline {
+  margin-block: 0.125rem;
+  display: inline-flex;
+  max-width: 100%;
+  align-items: baseline;
+  gap: 0.25rem;
+  border-radius: 0.125rem;
+  padding-inline: 0.25rem;
+  vertical-align: baseline;
+  background: var(--zt-elevated);
+  cursor: pointer;
+}
+
+.zt-md-editor .zt-md-math-inline[data-editing='true'] {
+  background: var(--zt-bg-active);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--zt-primary) 45%, var(--zt-border));
+}
+
+.zt-md-editor .zt-md-math-inline[data-editable='false'] {
+  cursor: default;
+}
+
+.zt-md-editor .zt-md-math-inline[data-editing='true'] > .zt-md-math-inline-preview,
+.zt-md-editor .zt-md-math-inline[data-editing='true'] > .zt-md-math-inline-error {
+  display: none;
+}
+
+.zt-md-editor .zt-md-math-inline:not([data-editing='true']) > .zt-md-math-inline-editor {
+  display: none !important;
+}
+
+.zt-md-editor .zt-md-math-inline-preview {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.zt-md-editor .zt-md-math-inline-error {
+  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--zt-destructive);
+}
+
+.zt-md-editor .zt-md-math-inline-editor {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 0.125rem;
+  padding-inline: 0.25rem;
+}
+
+.zt-md-editor .zt-md-math-inline-editor-input {
+  height: 1.5rem;
+  min-width: 120px;
+  max-width: 180px;
+  border: 0;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--zt-fg);
+  outline: none;
+}
+
+.zt-md-editor .zt-md-math-inline-editor-preview {
+  max-width: 160px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.zt-md-editor .zt-md-math-inline-editor-error {
+  white-space: nowrap;
+  font-size: 0.75rem;
+  color: var(--zt-destructive);
+}

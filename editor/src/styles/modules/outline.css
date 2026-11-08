@@ -1,0 +1,114 @@
+/* modules/outline.css — 大纲面板(内容右侧) */
+
+/* 宿主:内容行内的固定侧栏槽;data-open 驱动展开态(收起零占位)。 */
+.meditor-content-row {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+}
+
+/* 编辑区在行容器内横向伸展(纵向由行容器撑满;自身滚动规则不变)。 */
+.meditor-content-row > .meditor-editor-area {
+  min-width: 0;
+}
+
+.meditor-outline-host {
+  flex-shrink: 0;
+  display: none;
+  width: 264px;
+  min-width: 0;
+  flex-direction: column;
+  border-left: 1px solid var(--zt-border);
+  background: var(--zt-surface);
+}
+
+.meditor-outline-host[data-open='true'] {
+  display: flex;
+}
+
+.zt-md .zt-md-outline {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  color: var(--zt-fg);
+}
+
+.zt-md .zt-md-outline-header {
+  flex-shrink: 0;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+}
+
+.zt-md .zt-md-outline-title {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: var(--zt-muted);
+}
+
+.zt-md .zt-md-outline-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px 8px 12px;
+  list-style: none;
+}
+
+.zt-md .zt-md-outline-item {
+  margin: 0;
+  padding: 0;
+}
+
+.zt-md .zt-md-outline-empty {
+  padding: 8px 6px;
+  font-size: 0.9em;
+  color: var(--zt-muted);
+  opacity: 0.8;
+}
+
+.zt-md .zt-md-outline-link {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+  border: 0;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1.8;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-right: 6px;
+}
+
+.zt-md .zt-md-outline-link:hover {
+  background: var(--zt-bg-hover);
+}
+
+.zt-md .zt-md-outline-link[data-active='true'] {
+  background: var(--zt-bg-active);
+  color: var(--zt-primary);
+  font-weight: 600;
+}
+
+/* 窄屏:侧栏改为覆盖在内容上方(不挤压正文),避开顶部工具栏。 */
+@media (max-width: 767px) {
+  .meditor-content-row {
+    position: relative;
+  }
+
+  .meditor-outline-host {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    box-shadow: var(--zt-shadow);
+  }
+}

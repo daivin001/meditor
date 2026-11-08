@@ -1,0 +1,125 @@
+/* styles/modules/typography.css — 正文排版(标题/列表/链接/分割线)与间距
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/typography.css
+ */
+
+.zt-md-editor .ProseMirror h1,
+.zt-md-editor .ProseMirror h2,
+.zt-md-editor .ProseMirror h3,
+.zt-md-editor .ProseMirror h4,
+.zt-md-editor .ProseMirror h5,
+.zt-md-editor .ProseMirror h6 {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.28;
+}
+
+.zt-md-editor .ProseMirror h1 {
+  font-size: 2em;
+}
+
+.zt-md-editor .ProseMirror h2 {
+  font-size: 1.75em;
+}
+
+.zt-md-editor .ProseMirror h3 {
+  font-size: 1.5em;
+}
+
+.zt-md-editor .ProseMirror h4 {
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.zt-md-editor .ProseMirror h5 {
+  font-size: 1.125em;
+  font-weight: 600;
+}
+
+.zt-md-editor .ProseMirror h6 {
+  font-size: 1em;
+  font-weight: 600;
+}
+
+/* 标题聚焦态(仅保留定位上下文;H1/H2 浮动层级字样已移除——
+ * 层级信息由工具栏块转换下拉展示,且浮动字样会与块手柄(+ / 拖拽)重叠) */
+.zt-md-editor .ProseMirror .zt-md-heading-focused {
+  position: relative;
+}
+
+.zt-md-editor .ProseMirror :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6):not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+.zt-md-editor .ProseMirror :is(h1, h2, h3, h4, h5, h6):not(:first-child) {
+  margin-top: 0.75rem;
+}
+
+.zt-md-editor .ProseMirror :is(h1, h2, h3) + :is(p, ul, ol, blockquote) {
+  margin-top: 0.55em;
+}
+
+.zt-md-editor .ProseMirror ul,
+.zt-md-editor .ProseMirror ol {
+  margin: 0;
+  padding-inline-start: 16px;
+}
+
+.zt-md-editor .ProseMirror ul {
+  list-style-type: disc;
+}
+
+.zt-md-editor .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+.zt-md-editor .ProseMirror li:not([data-item-type="task"]) {
+  margin: 0.12em 0;
+}
+
+.zt-md-editor .ProseMirror li[data-item-type="task"] {
+  list-style: none;
+}
+
+.zt-md-editor .ProseMirror a[href] {
+  color: var(--zt-primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.18em;
+}
+
+.zt-md-editor .ProseMirror a[href]:hover {
+  color: color-mix(in srgb, var(--zt-primary) 82%, var(--zt-fg));
+}
+
+.zt-md-editor .ProseMirror hr {
+  margin: 0.9em 0;
+  border: 0;
+  border-top: 1px solid var(--zt-border);
+}
+
+@media (max-width: 560px) {
+  .zt-md-editor .ProseMirror h1 {
+    font-size: 1.65em;
+  }
+
+  .zt-md-editor .ProseMirror h2 {
+    font-size: 1.45em;
+  }
+
+  .zt-md-editor .ProseMirror h3 {
+    font-size: 1.3em;
+  }
+
+  .zt-md-editor .ProseMirror h4 {
+    font-size: 1.15em;
+  }
+
+  .zt-md-editor .ProseMirror h5 {
+    font-size: 1em;
+  }
+
+  .zt-md-editor .ProseMirror h6 {
+    font-size: 0.875em;
+  }
+}

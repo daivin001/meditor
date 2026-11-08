@@ -1,0 +1,70 @@
+/* styles/tokens.css — meditor 设计令牌
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/theme/tokens.css
+ * - --zt-* 全套令牌:字体/圆角 + light/dark 两套配色
+ * - 由 .zt-md-light / .zt-md-dark 挂在编辑器根节点生效
+ * - 设计偏差:light 主题 --zt-bg/--zt-elevated 已改中性纯灰(原蓝调灰视觉偏粉)
+ */
+
+:root {
+  --zt-font:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI Variable Text', 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC',
+    'Noto Sans SC', sans-serif;
+  --zt-font-display: var(--zt-font);
+  --zt-font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', 'Courier New', monospace;
+  --zt-radius: 4px;
+  --zt-radius-lg: 10px;
+}
+
+.zt-md-light {
+  color-scheme: light;
+  /* 中性淡灰(纯灰无色偏):原蓝调灰(#f6f8fc/#f2f5fb)在白底上视觉偏粉,按设计反馈改为纯灰 */
+  --zt-bg: #f5f5f5;
+  --zt-surface: #ffffff;
+  /* 浅灰统一为一个值:代码块/公式块/引用块/表头/行内代码等全部同色。
+   * = fg 4% 混白(#f7f8f8,原 #f5f5f5 偏深,按设计反馈改浅),与 jsondata 表头同观感 */
+  --zt-elevated: color-mix(in srgb, var(--zt-fg) 4%, var(--zt-surface));
+  /* 正文色柔和版:原 #162336(近黑藏蓝,对比度≈15:1)在纯灰背景下观感偏硬,降一档到 ≈9:1 */
+  --zt-fg: #3a4657;
+  --zt-muted: #5e7087;
+  /* 边框中性纯灰(RGB 三通道等值,无色偏;原 #d4d4d8 带蓝调泛粉,按设计反馈校准至 #e6e6e6) */
+  --zt-border: #e6e6e6;
+  /* 主色对齐编辑器主蓝(#2563eb);次级取同族浅一档(blue-500)。 */
+  --zt-primary: #2563eb;
+  --zt-primary-foreground: #ffffff;
+  --zt-secondary: #3b82f6;
+  --zt-destructive: #b4232d;
+  --zt-destructive-foreground: #ffffff;
+  --zt-glow: transparent;
+  /* 交互底色:中性灰 hover/选中(原主蓝混色在白底上泛粉,按设计反馈改灰;
+   * 选中态比 hover 深一档但整体调淡:#e0e0e0 → #e6e6e6,选中同时不再染蓝图标) */
+  --zt-bg-hover: #ececec;
+  --zt-bg-active: #e6e6e6;
+  --zt-shadow: 0 12px 28px -16px color-mix(in srgb, black 28%, transparent);
+}
+
+.zt-md-dark {
+  color-scheme: dark;
+  --zt-bg: #09090b;
+  --zt-surface: #111113;
+  /* 同浅色:fg 4% 混 surface(#1a1a1c,原 #1c1c1f 微调,保持两模式同推导) */
+  --zt-elevated: color-mix(in srgb, var(--zt-fg) 4%, var(--zt-surface));
+  --zt-fg: #f4f4f5;
+  --zt-muted: #a1a1aa;
+  --zt-border: #303036;
+  /* 暗底主色取主蓝的暗色亮化(blue-400),次级再浅一档(blue-300)。 */
+  --zt-primary: #60a5fa;
+  --zt-primary-foreground: #111116;
+  --zt-secondary: #93c5fd;
+  --zt-destructive: #ff7b82;
+  --zt-destructive-foreground: #1f0b0d;
+  --zt-glow: transparent;
+  /* 交互底色随浅色一并中性化:原主蓝混色在暗底泛蓝,改 fg 混入纯灰(hover 8% / 选中 14%,与浅色同"选中深一档"关系) */
+  --zt-bg-hover: color-mix(in srgb, var(--zt-fg) 8%, var(--zt-bg));
+  --zt-bg-active: color-mix(in srgb, var(--zt-fg) 14%, var(--zt-bg));
+  --zt-shadow: 0 12px 28px -16px color-mix(in srgb, black 28%, transparent);
+}

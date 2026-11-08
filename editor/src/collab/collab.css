@@ -1,0 +1,303 @@
+/*
+ * collab.css — meditor P4 协作配套(评论面板 + 版本历史面板)
+ *
+ * 类名前缀 zt-md-*,令牌消费编辑器的 --zt-* 变量(light/dark 自动适配)。
+ */
+
+/* ===== 版本历史面板 ===== */
+.zt-md-history-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--zt-border, #d4dde9);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  color: var(--zt-fg, #1f2937);
+  font-size: 12.5px;
+}
+
+.zt-md-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.zt-md-history-save {
+  padding: 2px 10px;
+  border: none;
+  border-radius: 5px;
+  background: var(--zt-primary, #2563eb);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-md-history-save:hover {
+  filter: brightness(1.08);
+}
+
+.zt-md-history-empty {
+  padding: 10px 4px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12px;
+}
+
+/* 操作失败错误条(面板顶部,临时展示) */
+.zt-md-history-error {
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, #d44c47 10%, transparent);
+  color: #d44c47;
+  font-size: 11.5px;
+  word-break: break-word;
+}
+
+.zt-md-history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.zt-md-history-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--zt-border, #d4dde9) 50%, transparent);
+}
+
+.zt-md-history-row:last-child {
+  border-bottom: none;
+}
+
+.zt-md-history-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-md-history-restore,
+.zt-md-history-remove {
+  flex: none;
+  padding: 1px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+
+.zt-md-history-restore:hover {
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 10%, transparent);
+  color: var(--zt-primary, #2563eb);
+}
+
+.zt-md-history-remove:hover {
+  color: #d44c47;
+  background: color-mix(in srgb, #d44c47 10%, transparent);
+}
+
+/* ===== 评论面板 ===== */
+.zt-md-comments-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--zt-border, #d4dde9);
+  border-radius: 8px;
+  background: var(--zt-surface, #ffffff);
+  color: var(--zt-fg, #1f2937);
+  font-size: 12.5px;
+}
+
+.zt-md-comments-head {
+  font-weight: 600;
+}
+
+.zt-md-comments-composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.zt-md-comments-input {
+  flex: 1;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 5px 7px;
+  border: 1px solid var(--zt-border, #d4dde9);
+  border-radius: 6px;
+  background: var(--zt-surface, #ffffff);
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  outline: none;
+}
+
+.zt-md-comments-input:focus {
+  border-color: var(--zt-primary, #2563eb);
+}
+
+.zt-md-comments-add {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 5px;
+  background: var(--zt-primary, #2563eb);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-md-comments-add:hover {
+  filter: brightness(1.08);
+}
+
+/* 一次性提示(无选区/锚点失效等,输入框下方) */
+.zt-md-comments-hint {
+  color: #b45309;
+  font-size: 11.5px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.zt-md-comments-hint[hidden] {
+  display: none;
+}
+
+.zt-md-comments-empty {
+  padding: 10px 4px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 12px;
+}
+
+.zt-md-comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.zt-md-comments-card {
+  padding: 6px 8px;
+  border: 1px solid var(--zt-border, #d4dde9);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 2%, transparent);
+}
+
+.zt-md-comments-card-resolved {
+  opacity: 0.65;
+}
+
+.zt-md-comments-card-stale {
+  border-style: dashed;
+}
+
+.zt-md-comments-quote {
+  margin-bottom: 3px;
+  padding: 2px 6px;
+  border-left: 2px solid var(--zt-primary, #2563eb);
+  background: color-mix(in srgb, var(--zt-primary, #2563eb) 6%, transparent);
+  color: var(--zt-muted, #5e7087);
+  font-size: 11.5px;
+  word-break: break-word;
+}
+
+/* 引用区可点击跳转锚点(注入 jumpToBlock 时) */
+.zt-md-comments-quote-clickable {
+  cursor: pointer;
+}
+
+.zt-md-comments-quote-clickable:hover {
+  color: var(--zt-primary, #2563eb);
+}
+
+.zt-md-comments-body {
+  word-break: break-word;
+}
+
+.zt-md-comments-stale-tag {
+  margin-top: 3px;
+  color: #b45309;
+  font-size: 11px;
+}
+
+.zt-md-comments-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.zt-md-comments-action {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--zt-muted, #5e7087);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.zt-md-comments-action:hover {
+  background: color-mix(in srgb, var(--zt-fg, #1f2937) 8%, transparent);
+  color: inherit;
+}
+
+.zt-md-comments-action-danger:hover {
+  color: #d44c47;
+}
+
+/* ===== 评论跳转高亮(点击卡片引用区,目标块短暂点亮) ===== */
+.zt-md-comment-jump-highlight {
+  animation: zt-md-comment-jump-flash 1s ease;
+  border-radius: var(--zt-radius, 6px);
+}
+
+@keyframes zt-md-comment-jump-flash {
+  0%,
+  55% {
+    background: color-mix(in srgb, var(--zt-primary, #2563eb) 14%, transparent);
+  }
+  100% {
+    background: transparent;
+  }
+}
+
+/* ===== 实时协同连接状态徽标 ===== */
+.zt-md-collab-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 2px;
+  color: var(--zt-muted, #5e7087);
+  font-size: 10.5px;
+  line-height: 1.2;
+  user-select: none;
+}
+
+.zt-md-collab-status-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  /* 缺省(连接中):灰点 */
+  background: var(--zt-muted, #9ca3af);
+}
+
+.zt-md-collab-status[data-status='connected'] .zt-md-collab-status-dot {
+  background: #22a06b;
+}
+
+.zt-md-collab-status[data-status='disconnected'] .zt-md-collab-status-dot {
+  background: #d44c47;
+}

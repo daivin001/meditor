@@ -1,0 +1,38 @@
+{
+  "name": "@meditor/csvkit",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Csvkit — 零依赖 CSV 解析/序列化单一实现(RFC 4180;mtable/jsonview 共用)",
+  "main": "./dist/csvkit.js",
+  "module": "./dist/csvkit.js",
+  "types": "./dist-types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist/csvkit.js"
+    }
+  },
+  "files": [
+    "dist",
+    "dist-types",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json && vite build"
+  },
+  "keywords": [
+    "csv",
+    "rfc4180",
+    "parse",
+    "serialize",
+    "meditor"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

@@ -1,0 +1,13 @@
+/* styles/modules/blockquote.css — 引用块
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/blockquote.css
+ */
+
+.zt-md-editor .ProseMirror blockquote {
+  margin: 0.75em 0;
+  padding: 0.55em 0.8em;
+  border-radius: var(--zt-radius) var(--zt-radius) var(--zt-radius) var(--zt-radius);
+  /* 统一走 --zt-elevated(= fg 4% 混白,与代码块/公式块/jsondata 表头同观感) */
+  background: var(--zt-elevated);
+  color: inherit;
+}

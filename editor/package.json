@@ -1,0 +1,74 @@
+{
+  "name": "@meditor/editor",
+  "version": "0.5.2",
+  "private": false,
+  "type": "module",
+  "description": "Meditor — 纯 TS DOM 的 Milkdown Markdown 所见即所得编辑器组件包（无框架依赖）",
+  "main": "./dist/meditor.js",
+  "module": "./dist/meditor.js",
+  "types": "./dist-types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist/meditor.js"
+    },
+    "./style.css": "./dist/meditor.css",
+    "./style-inline": {
+      "types": "./dist-types/style-inline.d.ts",
+      "import": "./dist/style-inline.js"
+    }
+  },
+  "files": [
+    "dist",
+    "dist-types",
+    "README.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && vite build",
+    "test": "vitest run"
+  },
+  "keywords": [
+    "markdown",
+    "editor",
+    "milkdown",
+    "wysiwyg",
+    "meditor"
+  ],
+  "author": "Daivin",
+  "license": "MIT",
+  "dependencies": {
+    "@milkdown/core": "^7.22.1",
+    "@milkdown/ctx": "^7.22.1",
+    "@milkdown/kit": "^7.22.1",
+    "@milkdown/plugin-clipboard": "^7.22.1",
+    "@milkdown/plugin-history": "^7.22.1",
+    "@milkdown/plugin-indent": "^7.22.1",
+    "@milkdown/plugin-listener": "^7.22.1",
+    "@milkdown/plugin-tooltip": "^7.22.1",
+    "@milkdown/preset-commonmark": "^7.22.1",
+    "@milkdown/preset-gfm": "^7.22.1",
+    "@milkdown/prose": "^7.22.1",
+    "@milkdown/utils": "^7.22.1",
+    "@meditor/jsonview": "^0.1.0",
+    "@meditor/mtable": "^0.1.0",
+    "katex": "^0.16.47",
+    "mermaid": "^12.1.0",
+    "prosemirror-search": "^1.1.1",
+    "refractor": "^4.9.0",
+    "remark-footnotes": "^4.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-math": "^6.0.0",
+    "y-prosemirror": "^1.3.7",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.32"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^3.2.4"
+  }
+}

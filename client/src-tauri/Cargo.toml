@@ -1,0 +1,33 @@
+[package]
+name = "meditor"
+version = "0.1.8"
+description = "MEditor — 基于 meditor 的 Markdown 桌面编辑器"
+authors = ["Daivin"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "meditor_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+# 文件关联双击 .md 时转发到已开窗口,避免多实例
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# GB18030 兜底解码:Windows 旧 .md 常见非 UTF-8 编码
+encoding_rs = "0.8"
+# PicGo server 等本地图床上传:后端转发 HTTP,避开 WebView 对 localhost 的 CORS 限制
+ureq = { version = "2", default-features = false, features = ["tls"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

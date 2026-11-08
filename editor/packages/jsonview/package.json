@@ -1,0 +1,45 @@
+{
+  "name": "@meditor/jsonview",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "description": "Jsonview — 数据库视图块组件包(围栏数据格式 + Table/Kanban/Gallery/List/Calendar/Gantt/Text 七种视图)",
+  "main": "./dist/jsonview.js",
+  "module": "./dist/jsonview.js",
+  "types": "./dist-types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-types/index.d.ts",
+      "import": "./dist/jsonview.js"
+    },
+    "./style.css": "./dist/jsonview.css"
+  },
+  "files": [
+    "dist",
+    "dist-types",
+    "README.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json && vite build"
+  },
+  "keywords": [
+    "jsonview",
+    "table",
+    "kanban",
+    "notion",
+    "meditor"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@meditor/csvkit": "^0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  }
+}

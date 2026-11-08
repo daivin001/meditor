@@ -1,0 +1,288 @@
+/* styles/modules/media-embed.css — 媒体嵌入块(视频/音频/书签/内嵌) */
+
+.zt-md-editor .zt-md-media-embed {
+  position: relative;
+  margin-block: 0.75rem;
+}
+
+.zt-md-editor .zt-md-media-embed[data-selected='true'] {
+  outline: 2px solid var(--zt-primary);
+  outline-offset: 2px;
+  border-radius: var(--zt-radius);
+}
+
+/* 视频宽度铺满容器;带自定义高度时以 object-fit 适配防拉伸,音频行内 */
+.zt-md-editor .zt-md-media-embed[data-kind='video'] video {
+  display: block;
+  max-width: 100%;
+  width: 100%;
+  border-radius: var(--zt-radius);
+  background: #000;
+  object-fit: contain;
+}
+
+.zt-md-editor .zt-md-media-embed[data-kind='audio'] audio {
+  display: block;
+  width: 100%;
+  /* 原生控件自带大圆角,显式收敛为 10px 直角感 */
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* video/audio 加载失败:隐藏原生控件,显示错误占位 */
+.zt-md-editor .zt-md-media-embed[data-load-error='true'] video,
+.zt-md-editor .zt-md-media-embed[data-load-error='true'] audio {
+  display: none;
+}
+
+.zt-md-editor .zt-md-media-embed-load-error {
+  display: none;
+}
+
+.zt-md-editor .zt-md-media-embed[data-load-error='true'] .zt-md-media-embed-load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 96px;
+  border: 1px dashed color-mix(in srgb, var(--zt-border) 78%, transparent);
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-muted) 10%, var(--zt-surface));
+  color: var(--zt-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.zt-md-editor .zt-md-media-embed-load-error svg {
+  flex: none;
+}
+
+/* 悬停操作区(编辑/删除按钮):右上角,悬停或选中时显现 */
+.zt-md-editor .zt-md-media-embed-actions {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  z-index: 20;
+  display: inline-flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-media-embed[data-editable='true']:hover .zt-md-media-embed-actions,
+.zt-md-editor .zt-md-media-embed[data-editable='true']:focus-within .zt-md-media-embed-actions,
+.zt-md-editor .zt-md-media-embed[data-editable='true'][data-selected='true'] .zt-md-media-embed-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zt-md-editor .zt-md-media-embed-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  cursor: pointer;
+  box-shadow: 0 2px 8px -4px color-mix(in srgb, black 28%, transparent);
+  transition: border-color 120ms ease-out, background 120ms ease-out;
+}
+
+.zt-md-editor .zt-md-media-embed-action-button:hover {
+  border-color: var(--zt-primary);
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-editor .zt-md-media-embed-action-button-danger:hover {
+  border-color: var(--zt-danger, #e5484d);
+  color: var(--zt-danger, #e5484d);
+}
+
+/* 内嵌 iframe:16:9 自适应;节点带自定义高度时由内联 height 覆盖(宽高均确定后 aspect-ratio 失效) */
+.zt-md-editor .zt-md-media-embed[data-kind='embed'] iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+}
+
+/* 内嵌高度缩放:视觉手柄(悬停热区时显现的蓝色横条,不参与命中) */
+.zt-md-editor .zt-md-media-embed-resize-handle {
+  position: absolute;
+  left: 50%;
+  z-index: 16;
+  opacity: 0;
+  transition: opacity 150ms ease;
+  width: 2.75rem;
+  max-width: calc(100% - 1rem);
+  min-width: 1.75rem;
+  height: 0.25rem;
+  background: var(--zt-primary);
+  border-radius: 2px;
+  cursor: ns-resize;
+  pointer-events: none;
+}
+
+.zt-md-editor .zt-md-media-embed-resize-handle-top {
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+
+.zt-md-editor .zt-md-media-embed-resize-handle-bottom {
+  bottom: 0;
+  transform: translate(-50%, 50%);
+}
+
+/*
+ * 缩放热区:透明横条常驻压在块上下边缘(无视觉反馈,命中用)。
+ * iframe 内容属于子文档,光标在其上时父文档 :hover 不触发;热区是父文档元素,
+ * 可直接命中并联动容器 :hover 唤起视觉手柄,悬停时不再铺整宽色带(选中态已有边框反馈)。
+ */
+.zt-md-editor .zt-md-media-embed-resize-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  height: 8px;
+  cursor: ns-resize;
+  touch-action: none;
+  background: transparent;
+}
+
+.zt-md-editor .zt-md-media-embed-resize-zone-top {
+  top: -6px;
+}
+
+.zt-md-editor .zt-md-media-embed-resize-zone-bottom {
+  bottom: -6px;
+}
+
+/* 只读态热区与手柄一律禁用 */
+.zt-md-editor .zt-md-media-embed[data-editable='false'] .zt-md-media-embed-resize-zone,
+.zt-md-editor .zt-md-media-embed[data-editable='false'] .zt-md-media-embed-resize-handle {
+  display: none;
+}
+
+/* 悬停/聚焦/选中/拖拽中:显现视觉手柄 */
+.zt-md-editor .zt-md-media-embed[data-editable='true']:hover .zt-md-media-embed-resize-handle,
+.zt-md-editor .zt-md-media-embed[data-editable='true']:focus-within .zt-md-media-embed-resize-handle,
+.zt-md-editor .zt-md-media-embed[data-editable='true'][data-selected='true'] .zt-md-media-embed-resize-handle,
+.zt-md-editor .zt-md-media-embed[data-editable='true'][data-resizing='true'] .zt-md-media-embed-resize-handle {
+  opacity: 1;
+}
+
+/* 书签卡片 */
+.zt-md-editor .zt-md-bookmark-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* 与视频等媒体一致:宽度铺满编辑区(盒模型含内边距,避免溢出) */
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border: 1px solid var(--zt-border);
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  text-decoration: none;
+  transition: border-color 120ms ease-out, background 120ms ease-out;
+}
+
+.zt-md-editor .zt-md-bookmark-card:hover {
+  border-color: var(--zt-primary);
+  background: var(--zt-bg-hover);
+}
+
+.zt-md-editor .zt-md-bookmark-icon {
+  display: inline-flex;
+  color: var(--zt-muted);
+  flex: none;
+}
+
+.zt-md-editor .zt-md-bookmark-url {
+  font-size: 0.9em;
+  word-break: break-all;
+}
+
+/* 媒体 URL 输入浮层(面板垂直布局:标题在上、输入行在下;默认 display:none,open 时显示) */
+.zt-md-media-embed-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 380px;
+  padding: 10px 12px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: var(--zt-radius, 6px);
+  background: var(--zt-surface, #ffffff);
+  color: var(--zt-fg, #1f2328);
+  box-shadow: 0 10px 24px -14px color-mix(in srgb, black 32%, transparent);
+}
+
+.zt-md-media-embed-panel-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zt-muted, #5e7087);
+}
+
+.zt-md-media-embed-panel-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.zt-md-media-embed-panel-input {
+  flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--zt-border, #e6e6e6);
+  border-radius: var(--zt-radius, 6px);
+  background: var(--zt-surface, #ffffff);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.zt-md-media-embed-panel-input:focus {
+  border-color: var(--zt-primary, #2563eb);
+}
+
+/* URL 无效:错误描边 + 提示文案 */
+.zt-md-media-embed-panel-input.zt-md-media-embed-panel-input-invalid {
+  border-color: var(--zt-danger, #e5484d);
+}
+
+.zt-md-media-embed-panel-error {
+  margin: -2px 0 0;
+  font-size: 12px;
+  color: var(--zt-danger, #e5484d);
+}
+
+.zt-md-media-embed-panel-confirm {
+  flex: none;
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--zt-primary, #2563eb);
+  border-radius: var(--zt-radius, 6px);
+  background: var(--zt-primary, #2563eb);
+  color: #ffffff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.zt-md-media-embed-panel-confirm:hover {
+  filter: brightness(1.08);
+}

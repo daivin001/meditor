@@ -1,0 +1,465 @@
+/* styles/modules/image-upload-dialog.css — 图片上传弹窗
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/image-upload-dialog.css
+ * (原版 Radix Dialog 的 [data-slot] 选择器已映射为 meditor 纯 DOM 类名)
+ */
+
+/* 用 .zt-md 组合选择器抬高特异性:宿主同时挂 .zt-md 类,需覆盖其 position:relative(原版靠 @layer utilities 优先级) */
+.zt-md.zt-md-dialog-host {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100vh;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--zt-fg);
+  font-family: var(--zt-font);
+  z-index: 1300;
+  pointer-events: none;
+  transition: none;
+}
+
+.zt-md-image-upload-dialog-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--zt-fg) 62%, transparent);
+  pointer-events: auto;
+}
+
+.zt-md-image-upload-host.zt-md-dark .zt-md-image-upload-dialog-overlay {
+  background: color-mix(in srgb, var(--zt-bg) 72%, transparent);
+}
+
+.zt-md-image-upload-content-shell {
+  box-sizing: border-box;
+  display: flex;
+  width: min(640px, calc(100vw - 32px));
+  max-height: min(90vh, 620px);
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 78%, transparent);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-surface);
+  box-shadow: 0 18px 42px color-mix(in srgb, var(--zt-fg) 22%, transparent);
+  padding: 12px 24px 0;
+}
+
+.zt-md-image-upload-content-shell *,
+.zt-md-image-upload-content-shell *::before,
+.zt-md-image-upload-content-shell *::after {
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.zt-md-image-upload-dialog-header {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.zt-md-image-upload-dialog-title {
+  display: block;
+  color: var(--zt-fg);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  padding-right: 36px;
+}
+
+.zt-md-image-upload-dialog-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--zt-radius);
+  background: transparent;
+  color: var(--zt-muted);
+  cursor: pointer;
+}
+
+.zt-md-image-upload-dialog-close:hover {
+  background: var(--zt-bg-hover);
+  color: var(--zt-fg);
+}
+
+/* 上传方式 segmented 切换 */
+.zt-md-image-upload-segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-muted) 9%, var(--zt-surface));
+  padding: 4px;
+}
+
+.zt-md-image-upload-segment {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: color-mix(in srgb, var(--zt-muted) 88%, var(--zt-fg));
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  height: 30px;
+  line-height: 1.4;
+  box-shadow: none;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.zt-md-image-upload-segment[data-active='true'] {
+  border-color: color-mix(in srgb, var(--zt-primary) 24%, var(--zt-border));
+  background: var(--zt-bg-hover);
+  color: var(--zt-primary);
+  box-shadow: none;
+}
+
+.zt-md-image-upload-segment:hover:not(:disabled) {
+  background: var(--zt-bg-active);
+  color: var(--zt-fg);
+}
+
+.zt-md-image-upload-segment:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 内容滚动区 */
+.zt-md-image-upload-content {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 16px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 12px 0 6px;
+}
+
+.zt-md-image-upload-control {
+  width: 100%;
+}
+
+.zt-md-image-upload-file {
+  position: relative;
+  width: 100%;
+}
+
+.zt-md-image-upload-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zt-md-image-upload-file-label {
+  display: flex;
+  width: 100%;
+  min-height: 240px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed color-mix(in srgb, var(--zt-border) 74%, var(--zt-surface));
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-muted) 6%, var(--zt-surface));
+  color: color-mix(in srgb, var(--zt-muted) 90%, var(--zt-fg));
+  cursor: pointer;
+  padding: 48px 24px;
+  text-align: center;
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s;
+}
+
+.zt-md-image-upload-file-label:hover,
+.zt-md-image-upload-file-label[data-drag-over='true'] {
+  border-color: color-mix(in srgb, var(--zt-primary) 45%, var(--zt-border));
+  background: var(--zt-bg-hover);
+  color: var(--zt-fg);
+}
+
+.zt-md-image-upload-file-label[data-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.zt-md-image-upload-file-label[data-disabled='true']:hover {
+  border-color: color-mix(in srgb, var(--zt-border) 74%, var(--zt-surface));
+  background: color-mix(in srgb, var(--zt-muted) 6%, var(--zt-surface));
+  color: var(--zt-muted);
+}
+
+.zt-md-image-upload-file-label[data-has-preview='true'] {
+  overflow: hidden;
+  padding: 0;
+}
+
+.zt-md-image-upload-file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  color: color-mix(in srgb, var(--zt-muted) 82%, var(--zt-fg));
+}
+
+.zt-md-image-upload-spin {
+  animation: zt-md-image-upload-spin 0.8s linear infinite;
+}
+
+.zt-md-image-upload-file-text {
+  margin-bottom: 6px;
+  color: var(--zt-fg);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.zt-md-image-upload-file-hint {
+  color: color-mix(in srgb, var(--zt-muted) 88%, var(--zt-fg));
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.zt-md-image-upload-file-preview {
+  display: block;
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+}
+
+.zt-md-image-upload-file-preview img,
+.zt-md-image-upload-url-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.zt-md-image-upload-preview-error {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--zt-muted) 14%, var(--zt-surface));
+  color: var(--zt-muted);
+  font-size: 14px;
+}
+
+.zt-md-image-upload-reselect-hint {
+  display: flex;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.zt-md-image-upload-reselect-hint[data-error='true'] {
+  color: var(--zt-destructive);
+}
+
+.zt-md-image-upload-hint-icon {
+  flex: 0 0 auto;
+}
+
+.zt-md-image-upload-hint-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zt-md-image-upload-reselect-hint[data-placeholder='true'] {
+  visibility: hidden;
+}
+
+/* URL 输入 */
+.zt-md-image-upload-url {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zt-md-image-upload-label {
+  color: var(--zt-fg);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.zt-md-image-upload-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.zt-md-image-upload-url-input,
+.zt-md-image-upload-alt-input {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 84%, var(--zt-surface));
+  border-radius: var(--zt-radius);
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.4;
+  outline: none;
+  padding: 9px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.zt-md-image-upload-url-input:focus,
+.zt-md-image-upload-alt-input:focus {
+  border-color: color-mix(in srgb, var(--zt-primary) 58%, var(--zt-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--zt-primary) 14%, transparent);
+}
+
+.zt-md-image-upload-url-input::placeholder,
+.zt-md-image-upload-alt-input::placeholder {
+  color: var(--zt-muted);
+}
+
+.zt-md-image-upload-url-input:disabled,
+.zt-md-image-upload-alt-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.zt-md-image-upload-url-preview {
+  height: 240px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--zt-border) 84%, var(--zt-surface));
+  border-radius: var(--zt-radius);
+  background: color-mix(in srgb, var(--zt-muted) 6%, var(--zt-surface));
+}
+
+/* 底部按钮区 */
+.zt-md-image-upload-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin: 0 -24px;
+  gap: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--zt-border) 72%, var(--zt-surface));
+  border-radius: 0;
+  background: var(--zt-surface);
+  padding: 12px 24px 16px;
+}
+
+.zt-md-image-upload-dialog-cancel,
+.zt-md-image-upload-dialog-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 62px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--zt-radius);
+  padding: 0 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* cancel = outline 变体 */
+.zt-md-image-upload-dialog-cancel {
+  border-color: color-mix(in srgb, var(--zt-border) 84%, var(--zt-surface));
+  background: var(--zt-surface);
+  color: var(--zt-fg);
+}
+
+.zt-md-image-upload-dialog-cancel:hover {
+  background: color-mix(in srgb, var(--zt-muted) 8%, var(--zt-surface));
+}
+
+/* confirm = default(主色)变体 */
+.zt-md-image-upload-dialog-confirm {
+  background: var(--zt-primary);
+  color: var(--zt-primary-foreground);
+}
+
+.zt-md-image-upload-dialog-confirm:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--zt-primary) 88%, var(--zt-fg));
+}
+
+.zt-md-image-upload-dialog-confirm:disabled {
+  background: color-mix(in srgb, var(--zt-fg) 48%, var(--zt-surface));
+  color: color-mix(in srgb, var(--zt-primary-foreground) 72%, transparent);
+  cursor: not-allowed;
+}
+
+@keyframes zt-md-image-upload-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .zt-md-image-upload-content-shell {
+    max-height: 95vh;
+    padding: 20px 20px 0;
+  }
+
+  .zt-md-image-upload-dialog-title {
+    padding-right: 48px;
+  }
+
+  .zt-md-image-upload-dialog-close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .zt-md-image-upload-content {
+    padding: 6px 0 20px;
+  }
+
+  .zt-md-image-upload-file-label {
+    min-height: 200px;
+    padding: 32px 16px;
+  }
+
+  .zt-md-image-upload-file-preview,
+  .zt-md-image-upload-url-preview {
+    height: 200px;
+  }
+
+  .zt-md-image-upload-dialog-footer {
+    margin: 0 -20px;
+    padding: 12px 20px 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .zt-md-image-upload-segment,
+  .zt-md-image-upload-url-input,
+  .zt-md-image-upload-alt-input,
+  .zt-md-image-upload-dialog-cancel,
+  .zt-md-image-upload-dialog-confirm {
+    min-height: 44px;
+  }
+}

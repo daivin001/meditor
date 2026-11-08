@@ -1,0 +1,259 @@
+import { imageSchema } from '@milkdown/preset-commonmark';
+import type { GetNodeSchema } from '@milkdown/utils';
+import { normalizeSafeImageUrl, parseSafeImageHtml } from '../../../utils/security';
+
+/**
+ * 图片宽度百分比最小值。
+ */
+export const IMAGE_WIDTH_MIN_PERCENT = 10;
+
+/**
+ * 图片宽度百分比最大值。
+ */
+export const IMAGE_WIDTH_MAX_PERCENT = 100;
+
+// 图片宽度 style 匹配规则。
+const IMAGE_WIDTH_STYLE_PATTERN = /^\s*width\s*:\s*(\d{1,3})%\s*;?\s*$/i;
+
+/**
+ * 图片 schema 配置上下文。
+ */
+interface ImageSchemaConfigContext {
+  /** 读取 schema 配置。 */
+  get: (key: typeof imageSchema.key) => GetNodeSchema;
+  /** 写入 schema 配置。 */
+  set: (key: typeof imageSchema.key, value: GetNodeSchema) => void;
+}
+
+/**
+ * 限制图片宽度百分比范围。
+ */
+export const clampImageWidthPercent = (widthPercent: number): number => {
+  return Math.min(IMAGE_WIDTH_MAX_PERCENT, Math.max(IMAGE_WIDTH_MIN_PERCENT, widthPercent));
+};
+
+/**
+ * 转换图片宽度 style 文本。
+ */
+export const formatImageWidthStyle = (widthPercent: number): string => {
+  return `width: ${clampImageWidthPercent(Math.round(widthPercent))}%;`;
+};
+
+/**
+ * 解析图片宽度百分比。
+ */
+export const parseImageWidthPercent = (style: unknown): number | null => {
+  if (typeof style !== 'string') {
+    return null;
+  }
+
+  // 宽度匹配结果。
+  const widthMatch = style.match(IMAGE_WIDTH_STYLE_PATTERN);
+  if (!widthMatch) {
+    return null;
+  }
+
+  // 图片宽度百分比。
+  const widthPercent = Number(widthMatch[1]);
+  if (!Number.isFinite(widthPercent)) {
+    return null;
+  }
+
+  return clampImageWidthPercent(widthPercent);
+};
+
+/**
+ * 规范化图片宽度 style。
+ */
+export const normalizeImageWidthStyle = (style: unknown): string => {
+  // 图片宽度百分比。
+  const widthPercent = parseImageWidthPercent(style);
+  if (widthPercent === null) {
+    return '';
+  }
+
+  return formatImageWidthStyle(widthPercent);
+};
+
+/**
+ * 转义 HTML 属性值。
+ */
+const escapeHtmlAttribute = (value: unknown): string => {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+};
+
+/**
+ * 序列化图片 HTML。
+ */
+const serializeImageHtml = (
+  attrs: Record<string, unknown>,
+  allowedProtocols: readonly string[]
+): string => {
+  // 归一化后的图片地址。
+  const src = normalizeSafeImageUrl(attrs.src, allowedProtocols);
+  if (!src) {
+    return '';
+  }
+
+  // 归一化后的图片替代文本。
+  const alt = typeof attrs.alt === 'string' ? attrs.alt : '';
+  // 图片标题。
+  const title = typeof attrs.title === 'string' ? attrs.title : '';
+  // 图片标题属性。
+  const titleAttribute = title ? ` title="${escapeHtmlAttribute(title)}"` : '';
+  // 归一化后的图片宽度样式。
+  const style = normalizeImageWidthStyle(attrs.style);
+
+  return `<img src="${escapeHtmlAttribute(src)}" alt="${escapeHtmlAttribute(alt)}"${titleAttribute} style="${escapeHtmlAttribute(style)}">`;
+};
+
+/**
+ * 创建支持 width style 的图片 schema。
+ *
+ * 图片保持 Milkdown 原生的行内原子节点(inline/atom),与 Markdown 语义一致:
+ * 图文可以共处同一行,前后均可继续输入文字或插入其他行内元素。
+ */
+const createResizableImageSchema = (
+  prevSchema: GetNodeSchema,
+  allowedProtocols: readonly string[]
+): GetNodeSchema => {
+  return (ctx) => {
+    // 原始图片 schema。
+    const schema = prevSchema(ctx);
+
+    return {
+      ...schema,
+      attrs: {
+        ...schema.attrs,
+        style: { default: '', validate: 'string' }
+      },
+      parseDOM: [
+        {
+          tag: 'img[src]',
+          getAttrs: (dom) => {
+            // 图片 DOM 节点。
+            const image = dom as HTMLImageElement;
+            // 归一化后的图片地址。
+            const src = normalizeSafeImageUrl(image.getAttribute('src') ?? '', allowedProtocols);
+            if (!src) {
+              return false;
+            }
+
+            return {
+              src,
+              alt: image.getAttribute('alt') ?? '',
+              title: image.getAttribute('title') ?? image.getAttribute('alt') ?? '',
+              style: normalizeImageWidthStyle(image.getAttribute('style') ?? '')
+            };
+          }
+        }
+      ],
+      parseMarkdown: {
+        match: (node) => {
+          return (
+            node.type === 'image' ||
+            (node.type === 'html' &&
+              parseSafeImageHtml(node.value, normalizeImageWidthStyle, allowedProtocols) !== null)
+          );
+        },
+        runner: (state, node, type) => {
+          if (node.type === 'html') {
+            // HTML 图片属性。
+            const attrs = parseSafeImageHtml(
+              node.value,
+              normalizeImageWidthStyle,
+              allowedProtocols
+            );
+            if (!attrs) {
+              return;
+            }
+
+            // 图片是行内节点:markdown 独行 <img> 会被解析为根级 html 块(引用/列表项
+            // 内同理),此时父容器是 doc 等块容器,不能直接挂行内节点,需补一层段落;
+            // 段落/标题等文本块内则直接挂载,保留图文同行结构。
+            if (state.top()?.type.isTextblock) {
+              state.addNode(type, attrs);
+              return;
+            }
+
+            // 段落节点类型。
+            const paragraphType = state.schema.nodes.paragraph;
+            if (!paragraphType) {
+              state.addNode(type, attrs);
+              return;
+            }
+
+            state.openNode(paragraphType);
+            state.addNode(type, attrs);
+            state.closeNode();
+            return;
+          }
+
+          // 归一化后的 Markdown 图片地址。
+          const src = normalizeSafeImageUrl(String(node.url ?? ''), allowedProtocols);
+          if (!src) {
+            return;
+          }
+
+          state.addNode(type, {
+            src,
+            alt: String(node.alt ?? ''),
+            title: String(node.title ?? ''),
+            style: ''
+          });
+        }
+      },
+      toMarkdown: {
+        match: (node) => {
+          return node.type.name === 'image';
+        },
+        runner: (state, node) => {
+          // 归一化后的图片地址。
+          const src = normalizeSafeImageUrl(node.attrs.src, allowedProtocols);
+          if (!src) {
+            return;
+          }
+
+          // 图片宽度 style。
+          const style = normalizeImageWidthStyle(node.attrs.style);
+          if (style) {
+            // 序列化后的安全图片 HTML。
+            const html = serializeImageHtml({ ...node.attrs, src, style }, allowedProtocols);
+            if (html) {
+              state.addNode('html', undefined, html);
+            }
+            return;
+          }
+
+          // 行内图片直接作为所在文本块的子节点输出;行内节点必然位于段落/标题等
+          // 文本块内,不再额外包一层段落(否则会产出嵌套段落)。
+          state.addNode('image', undefined, undefined, {
+            title: node.attrs.title,
+            url: src,
+            alt: node.attrs.alt
+          });
+        }
+      }
+    };
+  };
+};
+
+/**
+ * 配置支持尺寸调整的图片 schema。
+ */
+export const configureImageResizableSchema = (
+  ctx: ImageSchemaConfigContext,
+  allowedProtocols: readonly string[] = []
+): void => {
+  // 原始图片 schema 工厂。
+  const prevImageSchema = ctx.get(imageSchema.key) as GetNodeSchema;
+  ctx.set(imageSchema.key, createResizableImageSchema(prevImageSchema, allowedProtocols));
+};

@@ -1,0 +1,9 @@
+/* styles/modules/drop-cursor.css — 拖放光标
+ *
+ * 1:1 翻译自 zt-react-milkdown/src/styles/modules/drop-cursor.css
+ */
+
+.zt-md-editor .ProseMirror-dropcursor {
+  background-color: var(--zt-primary) !important;
+  border-radius: 1px;
+}

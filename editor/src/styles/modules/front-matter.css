@@ -1,0 +1,28 @@
+/* modules/front-matter.css — YAML Front Matter 元数据块 */
+
+.zt-md pre.zt-md-frontmatter {
+  position: relative;
+  margin: 8px 0;
+  padding: 12px 16px;
+  border: 1px dashed color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: var(--zt-radius-lg);
+  background: var(--zt-elevated);
+  font-family: var(--zt-font-mono);
+  font-size: 0.85em;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 首行 --- 边界视觉提示 */
+.zt-md pre.zt-md-frontmatter code::before {
+  content: '---';
+  display: block;
+  opacity: 0.45;
+}
+
+.zt-md pre.zt-md-frontmatter code::after {
+  content: '---';
+  display: block;
+  opacity: 0.45;
+}
