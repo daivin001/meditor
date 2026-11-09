@@ -13644,7 +13644,7 @@ const jk = (e, t) => {
       };
       return document.addEventListener("mousedown", k, !0), w.bindGlobal(), w.bindElement(
         $n(b.dom, e.scrollContainerSelector)
-      ), ga(b, y), {
+      ), ga(b, y), r.menu.isConnected || e.portalContainer.appendChild(r.menu), {
         update: (v, E) => {
           s = v;
           const M = !E || E.doc !== v.state.doc;
