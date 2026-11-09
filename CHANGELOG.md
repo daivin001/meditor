@@ -2,6 +2,17 @@
 
 本项目的版本演进：`@meditor/editor` 组件包与 MEditor 桌面应用各自独立编版本。
 
+## @meditor/editor 0.5.3
+
+### 修复
+
+- **协同绑定后 slash 菜单永久缺席**：collab `enableRealtime` 对运行中视图执行
+  `state.reconfigure`（追加 ySync/yUndo/yCursor），prosemirror-view 对插件数组
+  换新会先销毁全部旧插件 view 再按新表重建——slash 菜单 DOM 在插件加载体中
+  只创建一次，旧 view 的 `destroy()` 将其从 portal 摘走后，重建的 view 不再补挂，
+  导致敲 `/` 与工具栏 `+` 静默失效。现于插件 `view()` 中补挂脱连的菜单根元素
+  （同一元素复用，事件监听不受影响）。宿主协同挂载（备忘录/云盘文档等）均命中。
+
 ## @meditor/editor 0.5.2 / MEditor 桌面应用 0.1.8（首个开源版本）
 
 ### @meditor/editor（组件包）

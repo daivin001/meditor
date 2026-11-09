@@ -1,6 +1,6 @@
 {
   "name": "@meditor/editor",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "private": false,
   "type": "module",
   "description": "Meditor — 纯 TS DOM 的 Milkdown Markdown 所见即所得编辑器组件包（无框架依赖）",

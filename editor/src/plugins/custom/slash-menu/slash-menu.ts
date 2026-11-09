@@ -510,6 +510,15 @@ export const createSlashMenuPlugin = (options: SlashMenuPluginOptions) => {
         // 注册编程式打开器(工具栏绿色 + / 块手柄 + 调用;按视图实例隔离)。
         registerSlashMenuOpener(_editorView, openPinnedMenu);
 
+        // 菜单 DOM 补挂:运行中视图经 state.reconfigure 换插件数组时(collab
+        // enableRealtime 绑定 ySync/yUndo/yCursor 即此),prosemirror-view 先销毁
+        // 全部旧插件 view 再按新表重建——销毁会走 menuView.destroy() 把菜单从
+        // portal 摘走,而本 view() 重建时不再创建 DOM,菜单从此缺席(敲 '/' 与
+        // 工具栏 + 均静默失效)。同一元素复用补挂即可,事件监听不受影响。
+        if (!menuView.menu.isConnected) {
+          options.portalContainer.appendChild(menuView.menu);
+        }
+
         return {
           update: (view: EditorView, previousState: EditorState) => {
             currentView = view;
