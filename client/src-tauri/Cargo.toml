@@ -1,6 +1,6 @@
 [package]
 name = "meditor"
-version = "0.1.8"
+version = "0.1.9"
 description = "MEditor — 基于 meditor 的 Markdown 桌面编辑器"
 authors = ["Daivin"]
 license = "MIT"

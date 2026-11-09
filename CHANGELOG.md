@@ -2,7 +2,9 @@
 
 本项目的版本演进：`@meditor/editor` 组件包与 MEditor 桌面应用各自独立编版本。
 
-## @meditor/editor 0.5.3
+## @meditor/editor 0.5.3 / MEditor 桌面应用 0.1.9
+
+### @meditor/editor（组件包）
 
 ### 修复
 
@@ -12,6 +14,11 @@
   只创建一次，旧 view 的 `destroy()` 将其从 portal 摘走后，重建的 view 不再补挂，
   导致敲 `/` 与工具栏 `+` 静默失效。现于插件 `view()` 中补挂脱连的菜单根元素
   （同一元素复用，事件监听不受影响）。宿主协同挂载（备忘录/云盘文档等）均命中。
+
+### MEditor 桌面应用
+
+- 跟随 `@meditor/editor` 0.5.3 重新打包（vendor 同步），修复协同/版本历史场景
+  下 slash 菜单与工具栏 + 按钮失效；版本号 0.1.8 → 0.1.9。
 
 ## @meditor/editor 0.5.2 / MEditor 桌面应用 0.1.8（首个开源版本）
 

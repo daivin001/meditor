@@ -1,7 +1,7 @@
 {
   "name": "meditor-desktop",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "description": "MEditor — 基于 @meditor/editor 的 Markdown 桌面编辑器（Tauri + Rust）",
   "scripts": {
